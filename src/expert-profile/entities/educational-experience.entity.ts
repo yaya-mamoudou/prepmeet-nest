@@ -18,7 +18,6 @@ export class EducationalExperience {
   @Column()
   userId: number;
 
-  @Column()
   @ManyToOne(() => User, (user) => user.profile)
   @JoinColumn({ name: 'userId' })
   user: number;

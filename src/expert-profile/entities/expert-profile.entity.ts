@@ -35,6 +35,15 @@ export class ExpertProfile {
   visibilityLevel: VisibilityLevel;
 
   @Column({ nullable: true })
+  starterPrice: number;
+
+  @Column({ nullable: true })
+  recommendedPrice: number;
+
+  @Column({ nullable: true })
+  bestPrice: number;
+
+  @Column({ nullable: true })
   createdDate: Date;
 
   @Column({ nullable: true })

@@ -8,6 +8,7 @@ import { ExpertRoleStrategy } from './strategies/expert-role.strategy';
 import { FocusArea } from './entities/focus-area.entity';
 import { Degrees } from './entities/degrees.entity';
 import { EducationalExperience } from './entities/educational-experience.entity';
+import { Certification } from './entities/certification.entity';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { EducationalExperience } from './entities/educational-experience.entity'
       FocusArea,
       Degrees,
       EducationalExperience,
+      Certification,
     ]),
   ],
   providers: [ExpertProfileService, AtStrategy, RtStrategy, ExpertRoleStrategy],

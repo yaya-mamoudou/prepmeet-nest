@@ -1,3 +1,4 @@
+import { Certification } from 'src/expert-profile/entities/certification.entity';
 import { EducationalExperience } from 'src/expert-profile/entities/educational-experience.entity';
 import { ExpertProfile } from 'src/expert-profile/entities/expert-profile.entity';
 import { Gender, UserRole } from 'src/utils/enum';
@@ -67,4 +68,7 @@ export class User {
 
   @OneToMany(() => EducationalExperience, (eduExp) => eduExp.userId)
   educationalExperience: EducationalExperience[];
+
+  @OneToMany(() => Certification, (certification) => certification.userId)
+  certificationId: Certification[];
 }

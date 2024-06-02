@@ -16,11 +16,14 @@ import { ExpertProfileService } from './expert-profile.service';
 import { AuthGuard } from '@nestjs/passport';
 import {
   ExpertProfileUpdateExample,
+  addCertification,
   addEducationalExperience,
 } from 'src/auth/examples/profile';
 import {
+  AddCertificationDto,
   AddEducationExperienceDto,
   UpdateExpertProfileDto,
+  updateCertificationDto,
 } from './dto/update-profile.dto';
 
 @Controller('expert-profile')
@@ -108,5 +111,104 @@ export class ExpertProfileController {
   ) {
     const user = req.user;
     return this.expertProfileService.deleteEducationById(user.uid, educationId);
+  }
+
+  @Patch('/educational-experience/:educationId')
+  @ApiOperation({ summary: 'Update a specific educational experience by id' })
+  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('expert-role'))
+  @ApiBody({
+    type: AddEducationExperienceDto,
+    examples: {
+      ExpertProfileUpdateExample: {
+        value: addEducationalExperience,
+      },
+    },
+  })
+  updateEducationById(
+    @Param('educationId') educationId: number,
+    @Request() req: any,
+    @Body() body: any,
+  ) {
+    const user = req.user;
+    return this.expertProfileService.updateEducationById(
+      user.uid,
+      educationId,
+      body,
+    );
+  }
+
+  @Post('/certification')
+  @ApiOperation({ summary: 'Add new certification' })
+  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('expert-role'))
+  @UsePipes(ValidationPipe)
+  @ApiBody({
+    type: AddCertificationDto,
+    examples: {
+      ExpertProfileUpdateExample: {
+        value: addCertification,
+      },
+    },
+  })
+  addCertificationExp(
+    @Request() req: any,
+    @Body()
+    body: {
+      certifications: AddCertificationDto[];
+    },
+  ) {
+    const user = req.user;
+    return this.expertProfileService.addCertification(
+      user.uid,
+      body.certifications,
+    );
+  }
+
+  @Get('/:expertId/certification')
+  @ApiOperation({ summary: 'Get an experts certification' })
+  @UseGuards(AuthGuard('jwt'))
+  getCertificationById(@Param('expertId') expertId: number) {
+    return this.expertProfileService.getCertificationById(expertId);
+  }
+
+  @Delete('/certification/:certificationId')
+  @ApiOperation({ summary: 'Delete a specific certification by id' })
+  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('expert-role'))
+  deleteCertificationById(
+    @Param('certificationId') certificationId: number,
+    @Request() req: any,
+  ) {
+    const user = req.user;
+    return this.expertProfileService.deleteCertificationById(
+      user.uid,
+      certificationId,
+    );
+  }
+
+  @Patch('/certification/:certificationId')
+  @ApiOperation({ summary: 'Update a specific certification by id' })
+  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('expert-role'))
+  @ApiBody({
+    type: updateCertificationDto,
+    examples: {
+      ExpertProfileUpdateExample: {
+        value: addCertification,
+      },
+    },
+  })
+  updateCertificationById(
+    @Param('certificationId') certificationId: number,
+    @Request() req: any,
+    @Body() body: any,
+  ) {
+    const user = req.user;
+    return this.expertProfileService.updateCertificationById(
+      user.uid,
+      certificationId,
+      body,
+    );
   }
 }

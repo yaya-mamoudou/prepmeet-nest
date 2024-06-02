@@ -10,6 +10,7 @@ import { ExpertProfile } from './expert-profile/entities/expert-profile.entity';
 import { FocusArea } from './expert-profile/entities/focus-area.entity';
 import { EducationalExperience } from './expert-profile/entities/educational-experience.entity';
 import { Degrees } from './expert-profile/entities/degrees.entity';
+import { Certification } from './expert-profile/entities/certification.entity';
 
 @Module({
   controllers: [AppController],
@@ -34,6 +35,7 @@ import { Degrees } from './expert-profile/entities/degrees.entity';
           FocusArea,
           EducationalExperience,
           Degrees,
+          Certification,
         ],
         synchronize: true,
       }),

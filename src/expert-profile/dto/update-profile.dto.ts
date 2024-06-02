@@ -20,3 +20,30 @@ export class AddEducationExperienceDto {
   @IsNotEmpty()
   degreeId: number;
 }
+
+export class updateEducationExperienceDto {
+  name: string;
+
+  year: string;
+
+  degreeId: number;
+}
+
+export class AddCertificationDto {
+  @IsNotEmpty()
+  name: string;
+
+  @IsNotEmpty()
+  year: string;
+
+  @IsNotEmpty()
+  certificationUrl: number;
+}
+
+export class updateCertificationDto {
+  name: string;
+
+  year: string;
+
+  certificationUrl: number;
+}

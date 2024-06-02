@@ -3,6 +3,11 @@ import { VisibilityLevel } from 'src/utils/enum';
 export const ExpertProfileUpdateExample = {
   about: 'hey there i am jone doe',
   visibilityLevel: VisibilityLevel,
+  starterPrice: 10,
+  recommendedPrice: 20,
+  bestPrice: 15,
+  videoUrl: 'http://video.com',
+  focusAreaId: 1,
 };
 
 export const addEducationalExperience = {
@@ -22,6 +27,23 @@ export const addEducationalExperience = {
         name: 'Btech',
         degreeId: 3,
         year: '2022',
+      },
+    ],
+  },
+};
+
+export const addCertification = {
+  eduExp: {
+    eduExp: [
+      {
+        name: 'SCRUM EXPERT',
+        certificationUrl: 'certup.com',
+        year: '2000',
+      },
+      {
+        name: 'SCRUM EXPERT',
+        certificationUrl: 'certup.com',
+        year: '2000',
       },
     ],
   },
