@@ -1,6 +1,13 @@
+import { EducationalExperience } from 'src/expert-profile/entities/educational-experience.entity';
 import { ExpertProfile } from 'src/expert-profile/entities/expert-profile.entity';
 import { Gender, UserRole } from 'src/utils/enum';
-import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  OneToMany,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 @Entity('user')
 export class User {
@@ -57,4 +64,7 @@ export class User {
 
   @OneToOne(() => ExpertProfile, (expert) => expert.userId)
   profile: ExpertProfile;
+
+  @OneToMany(() => EducationalExperience, (eduExp) => eduExp.userId)
+  educationalExperience: EducationalExperience[];
 }

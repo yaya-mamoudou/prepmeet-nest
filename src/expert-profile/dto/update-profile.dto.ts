@@ -1,4 +1,4 @@
-import { IsEnum } from 'class-validator';
+import { IsEnum, IsNotEmpty } from 'class-validator';
 import { VisibilityLevel } from 'src/utils/enum';
 
 export class UpdateExpertProfileDto {
@@ -8,4 +8,15 @@ export class UpdateExpertProfileDto {
   @IsEnum(VisibilityLevel)
   visibilityLevel: VisibilityLevel;
   focusAreaId: number;
+}
+
+export class AddEducationExperienceDto {
+  @IsNotEmpty()
+  name: string;
+
+  @IsNotEmpty()
+  year: string;
+
+  @IsNotEmpty()
+  degreeId: number;
 }

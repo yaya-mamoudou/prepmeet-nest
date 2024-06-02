@@ -18,9 +18,12 @@ export class ExpertProfile {
   @JoinColumn({ name: 'userId' })
   userId: number;
 
+  @Column({ nullable: true })
+  focusAreaId: number;
+
   @OneToOne(() => FocusArea, (focusArea) => focusArea.profile)
   @JoinColumn({ name: 'focusAreaId' })
-  focusAreaId: number;
+  focusArea: FocusArea;
 
   @Column({ nullable: true })
   about: string;

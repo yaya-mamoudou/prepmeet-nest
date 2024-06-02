@@ -54,11 +54,4 @@ export class AuthController {
   login(@Body() user: LoginDto) {
     return this.authService.login(user);
   }
-
-  @Get('/alice')
-  @UseGuards(AuthGuard('jwt'))
-  getAlice(@Request() req: any) {
-    const user = req.user;
-    console.log('get alice', user);
-  }
 }
