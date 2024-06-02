@@ -7,6 +7,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { User } from './auth/entities/auth.entity';
 import { ExpertProfileModule } from './expert-profile/expert-profile.module';
 import { ExpertProfile } from './expert-profile/entities/expert-profile.entity';
+import { FocusArea } from './expert-profile/entities/focus-area.entity';
 
 @Module({
   controllers: [AppController],
@@ -25,7 +26,7 @@ import { ExpertProfile } from './expert-profile/entities/expert-profile.entity';
         username: configService.get('DB_USERNAME'),
         password: configService.get('DB_PASSWORD'),
         database: configService.get('DB_NAME'),
-        entities: [ExpertProfile, User],
+        entities: [ExpertProfile, User, FocusArea],
         synchronize: true,
       }),
     }),

@@ -3,21 +3,24 @@ import { VisibilityLevel } from 'src/utils/enum';
 import {
   Column,
   Entity,
-  JoinTable,
+  JoinColumn,
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { FocusArea } from './focus-area.entity';
 
 @Entity('expert-profile')
 export class ExpertProfile {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @OneToOne(() => User, (user) => user.profile)
+  @JoinColumn({ name: 'userId' })
   userId: number;
-  @OneToOne(() => User)
-  @JoinTable()
-  user: User;
+
+  @OneToOne(() => FocusArea, (focusArea) => focusArea.profile)
+  @JoinColumn({ name: 'focusAreaId' })
+  focusAreaId: number;
 
   @Column({ nullable: true })
   about: string;

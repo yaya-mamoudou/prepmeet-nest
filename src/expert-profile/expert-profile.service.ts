@@ -3,7 +3,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ExpertProfile } from './entities/expert-profile.entity';
 import { UpdateExpertProfileDto } from './dto/update-profile.dto';
-import { VisibilityLevel } from 'src/utils/enum';
 
 @Injectable()
 export class ExpertProfileService {
@@ -20,6 +19,7 @@ export class ExpertProfileService {
         userId: id,
         createdDate: new Date(),
         updatedDate: new Date(),
+        focusAreaId: 3,
       });
     }
 
