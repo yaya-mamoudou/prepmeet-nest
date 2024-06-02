@@ -1,8 +1,7 @@
-import { ApiProperty } from '@nestjs/swagger';
 import { Gender, UserRole } from 'src/utils/enum';
-import { Column, Entity, PrimaryColumn, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
-@Entity('User')
+@Entity('user')
 export class User {
   @PrimaryGeneratedColumn()
   id: number;
@@ -27,6 +26,9 @@ export class User {
 
   @Column()
   hasAcceptedTerms: boolean;
+
+  @Column({ nullable: true })
+  hasedRefreshToken: string;
 
   @Column({ nullable: true })
   phoneNumber: string;

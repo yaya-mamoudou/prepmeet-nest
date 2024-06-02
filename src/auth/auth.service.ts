@@ -1,21 +1,30 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { User } from './entities/auth.entity';
-import { RegisterDto } from './dto/auth.dto';
+import { LoginDto, RegisterDto } from './dto/auth.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { hashText } from 'src/utils/util';
 import { UserRole } from 'src/utils/enum';
+import { JwtService } from '@nestjs/jwt';
+
+export interface JWTTokens {
+  accessToken: string;
+  refeshToken: string;
+  // accessTokenExpiresIn: string;
+  // refreshToken: string;
+  // refreshTokenExpiresIn: string;
+}
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(User)
     private userRepo: Repository<User>,
+    private readonly jwtService: JwtService,
   ) {}
 
   async registerUser(user: RegisterDto) {
-    let userDetails = await this.userRepo.findOneBy({ email: user.email });
-
+    const userDetails = await this.userRepo.findOneBy({ email: user.email });
     if (userDetails) {
       throw new HttpException(
         `Email address already in use, please try again with another email`,
@@ -54,6 +63,71 @@ export class AuthService {
       password: hashText(user.password),
     };
 
-    return await this.userRepo.save(data);
+    const newUser = await this.userRepo.create({
+      ...user,
+      createdDate: new Date(),
+      updatedDate: new Date(),
+      password: hashText(user.password),
+    });
+    const tokens = await this.getToken(newUser);
+    // await this.updateRTHash(newUser.id, tokens.refeshToken);
+    await this.userRepo.save(data);
+    return tokens;
+  }
+
+  async login(user: LoginDto) {
+    const userDetails = await this.userRepo.findOneBy({ email: user.email });
+    const passwordValidation = hashText(user.password);
+
+    if (!userDetails || passwordValidation !== userDetails.password) {
+      throw new HttpException(
+        `Invalid login credentials, ensure you are sending the right email and password and try again`,
+        HttpStatus.CONFLICT,
+      );
+    }
+
+    const tokens = await this.getToken(userDetails);
+
+    return tokens;
+  }
+
+  async getToken(user: User): Promise<JWTTokens> {
+    const [at, rt] = await Promise.all([
+      this.jwtService.signAsync(
+        {
+          uid: user.id,
+          email: user.email,
+          role: user.role,
+        },
+        {
+          expiresIn: 60 * 60 * 24 * 7,
+          secret: 'at-secret',
+        },
+      ),
+      this.jwtService.signAsync(
+        {
+          uid: user.id,
+          email: user.email,
+          role: user.role,
+        },
+        {
+          expiresIn: 60 * 60 * 24 * 7,
+          secret: 'rt-secret',
+        },
+      ),
+    ]);
+
+    return {
+      accessToken: at,
+      refeshToken: rt,
+    };
+  }
+
+  async updateRTHash(userId: number, refreshToken: string) {
+    const hash = hashText(refreshToken);
+
+    await this.userRepo.update(userId, {
+      hasedRefreshToken: 'alice',
+    });
   }
 }
