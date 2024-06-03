@@ -6,6 +6,7 @@ import { Repository } from 'typeorm';
 import { hashText } from 'src/utils/util';
 import { UserRole } from 'src/utils/enum';
 import { JwtService } from '@nestjs/jwt';
+import { MailerService } from '@nestjs-modules/mailer';
 
 export interface JWTTokens {
   accessToken: string;
@@ -21,7 +22,8 @@ export class AuthService {
     @InjectRepository(User)
     private userRepo: Repository<User>,
     private readonly jwtService: JwtService,
-  ) {}
+  ) // private readonly mailService: MailerService,
+  {}
 
   async registerUser(user: RegisterDto) {
     const userDetails = await this.userRepo.findOneBy({ email: user.email });
@@ -85,6 +87,14 @@ export class AuthService {
         HttpStatus.CONFLICT,
       );
     }
+    // const message = `Sup Yaya?`;
+
+    // this.mailService.sendMail({
+    //   from: 'Alice Ndeh <alicendeh16@gmail.com>',
+    //   to: 'yayamamoudou0@gmail.com',
+    //   subject: `Hey test email`,
+    //   text: message,
+    // });
 
     const tokens = await this.getToken(userDetails);
 
