@@ -11,6 +11,10 @@ import { FocusArea } from './expert-profile/entities/focus-area.entity';
 import { EducationalExperience } from './expert-profile/entities/educational-experience.entity';
 import { Degrees } from './expert-profile/entities/degrees.entity';
 import { Certification } from './expert-profile/entities/certification.entity';
+import { MailerModule } from '@nestjs-modules/mailer';
+import { VerificationCode } from './auth/entities/verification-code';
+import { VerificationEmail } from './auth/entities/verification-email';
+// import { VerificationEmail } from './auth/entities/verification-email';
 
 @Module({
   controllers: [AppController],
@@ -36,8 +40,23 @@ import { Certification } from './expert-profile/entities/certification.entity';
           EducationalExperience,
           Degrees,
           Certification,
+          VerificationCode,
+          VerificationEmail,
         ],
         synchronize: true,
+      }),
+    }),
+    MailerModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        transport: {
+          host: configService.get('EMAIL_HOST'),
+          auth: {
+            user: configService.get('EMAIL_USERNAME'),
+            pass: configService.get('EMAIL_PASSWORD'),
+          },
+        },
       }),
     }),
   ],

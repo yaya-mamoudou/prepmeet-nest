@@ -6,11 +6,13 @@ import { User } from './entities/auth.entity';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { AtStrategy, RtStrategy } from './stategies';
+import { VerificationCode } from './entities/verification-code';
+import { VerificationEmail } from './entities/verification-email';
 
 @Module({
   imports: [
     PassportModule,
-    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([User, VerificationCode, VerificationEmail]),
     JwtModule.register({}),
   ],
   controllers: [AuthController],

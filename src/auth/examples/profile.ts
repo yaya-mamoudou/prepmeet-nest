@@ -11,40 +11,36 @@ export const ExpertProfileUpdateExample = {
 };
 
 export const addEducationalExperience = {
-  eduExp: {
-    eduExp: [
-      {
-        name: 'GCE O LEVELS',
-        degreeId: 1,
-        year: '2000',
-      },
-      {
-        name: 'GCE A LEVELS',
-        degreeId: 2,
-        year: '2001',
-      },
-      {
-        name: 'Btech',
-        degreeId: 3,
-        year: '2022',
-      },
-    ],
-  },
+  eduExp: [
+    {
+      name: 'GCE O LEVELS',
+      degreeId: 1,
+      year: '2000',
+    },
+    {
+      name: 'GCE A LEVELS',
+      degreeId: 2,
+      year: '2001',
+    },
+    {
+      name: 'Btech',
+      degreeId: 3,
+      year: '2022',
+    },
+  ],
 };
 
 export const addCertification = {
-  eduExp: {
-    eduExp: [
-      {
-        name: 'SCRUM EXPERT',
-        certificationUrl: 'certup.com',
-        year: '2000',
-      },
-      {
-        name: 'SCRUM EXPERT',
-        certificationUrl: 'certup.com',
-        year: '2000',
-      },
-    ],
-  },
+  certification: [
+    {
+      name: 'SCRUM EXPERT',
+      certificationUrl: 'certup.com',
+      year: '2000',
+    },
+    {
+      name: 'SCRUM EXPERT',
+      certificationUrl: 'certup.com',
+      year: '2000',
+    },
+  ],
 };
