@@ -39,3 +39,34 @@ export class RegisterDto {
   dateOfBirth: Date;
   phoneNumber: string;
 }
+
+export class SocialRegistrationDto {
+  @IsNotEmpty()
+  accessToken: string;
+
+  @IsNotEmpty()
+  role: UserRole;
+
+  @IsNotEmpty()
+  hasAcceptedTerms: boolean;
+}
+
+export class SocialLoginDto {
+  @IsNotEmpty()
+  accessToken: string;
+}
+
+export class ResetPasswordDto {
+  @IsNotEmpty()
+  @Length(6, 30)
+  newPassword: string;
+
+  @IsNotEmpty()
+  code: number;
+}
+
+export class AuthResetPasswordDto {
+  @IsNotEmpty()
+  @Length(6, 30)
+  newPassword: string;
+}

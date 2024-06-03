@@ -30,7 +30,7 @@ export class User {
   @Column({ nullable: true, default: false })
   emailVerified: boolean;
 
-  @Column()
+  @Column({ nullable: true })
   password: string;
 
   @Column()
