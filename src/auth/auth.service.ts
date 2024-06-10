@@ -125,8 +125,6 @@ export class AuthService {
   }
 
   async googleLogin(body: SocialLoginDto) {
-    console.log('in here');
-
     const res = await axios.get(
       `https://www.googleapis.com/oauth2/v1/userinfo?access_token=${body.accessToken}`,
     );
@@ -208,6 +206,12 @@ export class AuthService {
   async getUserByEmail({ email }) {
     return await this.userRepo.findOneBy({
       email: email,
+    });
+  }
+
+  async getUserById(id) {
+    return await this.userRepo.findOneBy({
+      id: id,
     });
   }
 
@@ -374,8 +378,6 @@ export class AuthService {
   }
 
   async resetPassword(id: number, password: string) {
-    console.log(id, password);
-
     return await this.userRepo.update(id, { password: hashText(password) });
   }
 }

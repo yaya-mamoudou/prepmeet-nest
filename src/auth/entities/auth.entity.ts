@@ -1,6 +1,7 @@
 import { Certification } from 'src/expert-profile/entities/certification.entity';
 import { EducationalExperience } from 'src/expert-profile/entities/educational-experience.entity';
 import { ExpertProfile } from 'src/expert-profile/entities/expert-profile.entity';
+import { Conversation } from 'src/messages/entity/conversation.entity';
 import { Gender, UserRole } from 'src/utils/enum';
 import {
   Column,
@@ -71,4 +72,10 @@ export class User {
 
   @OneToMany(() => Certification, (certification) => certification.userId)
   certificationId: Certification[];
+
+  @OneToOne(() => Conversation, (expert) => expert.initiatorId)
+  initiator: Conversation;
+
+  @OneToOne(() => Conversation, (expert) => expert.initiatorWithUserId)
+  initiatorWithUser: Conversation;
 }

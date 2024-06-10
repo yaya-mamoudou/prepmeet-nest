@@ -15,6 +15,8 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { VerificationCode } from './auth/entities/verification-code';
 import { VerificationEmail } from './auth/entities/verification-email';
 // import { VerificationEmail } from './auth/entities/verification-email';
+import { MessagesModule } from './messages/messages.module';
+import { Conversation } from './messages/entity/conversation.entity';
 
 @Module({
   controllers: [AppController],
@@ -42,6 +44,7 @@ import { VerificationEmail } from './auth/entities/verification-email';
           Certification,
           VerificationCode,
           VerificationEmail,
+          Conversation,
         ],
         synchronize: true,
       }),
@@ -59,6 +62,7 @@ import { VerificationEmail } from './auth/entities/verification-email';
         },
       }),
     }),
+    MessagesModule,
   ],
 })
 export class AppModule {}

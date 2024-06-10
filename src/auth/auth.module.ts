@@ -17,5 +17,6 @@ import { VerificationEmail } from './entities/verification-email';
   ],
   controllers: [AuthController],
   providers: [AuthService, AtStrategy, RtStrategy],
+  exports: [AuthService],
 })
 export class AuthModule {}
