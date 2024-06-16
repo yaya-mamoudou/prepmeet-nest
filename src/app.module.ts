@@ -17,10 +17,13 @@ import { VerificationEmail } from './auth/entities/verification-email';
 // import { VerificationEmail } from './auth/entities/verification-email';
 import { MessagesModule } from './messages/messages.module';
 import { Conversation } from './messages/entity/conversation.entity';
+import { PusherService } from './pusher/pusher.service';
+import { PusherModule } from './pusher/pusher.module';
+import { Message } from './messages/entity/message.entity';
 
 @Module({
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, PusherService],
   imports: [
     AuthModule,
     ExpertProfileModule,
@@ -45,6 +48,7 @@ import { Conversation } from './messages/entity/conversation.entity';
           VerificationCode,
           VerificationEmail,
           Conversation,
+          Message,
         ],
         synchronize: true,
       }),
@@ -63,6 +67,7 @@ import { Conversation } from './messages/entity/conversation.entity';
       }),
     }),
     MessagesModule,
+    PusherModule,
   ],
 })
 export class AppModule {}
