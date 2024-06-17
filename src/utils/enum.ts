@@ -23,3 +23,20 @@ export enum SocialAuthenticationParam {
   google = 'google',
   facebook = 'facebook',
 }
+
+export enum SessionStatus {
+  pending = 'PENDING',
+  success = 'SUCCESS',
+  booked = 'BOOKED',
+  canceled = 'CANCELED',
+  upcoming = 'UPCOMING',
+  expired = 'EXPIRED',
+}
+
+export enum StripePaymentStatus {
+  expired = 'expired',
+  complete = 'complete',
+  open = 'open',
+  paid = 'paid',
+  unpaid = 'unpaid',
+}

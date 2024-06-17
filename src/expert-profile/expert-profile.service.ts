@@ -14,6 +14,7 @@ import { EducationalExperience } from './entities/educational-experience.entity'
 import { Degrees } from './entities/degrees.entity';
 import { Certificate } from 'crypto';
 import { Certification } from './entities/certification.entity';
+import { StripeService } from 'src/stripe/stripe.service';
 
 @Injectable()
 export class ExpertProfileService {
@@ -28,6 +29,7 @@ export class ExpertProfileService {
     private degreesRepo: Repository<Degrees>,
     @InjectRepository(Certification)
     private certificateRepo: Repository<Certification>,
+    private stripeService: StripeService,
   ) {}
 
   async getExpertProfile(id: number) {
@@ -48,7 +50,12 @@ export class ExpertProfileService {
   }
 
   async updateExpertProfile(id: number, profileInfo: UpdateExpertProfileDto) {
-    let userInfo = await this.expertProfileRepo.findOneBy({ userId: id });
+    let userInfo = await this.expertProfileRepo.findOne({
+      where: {
+        userId: id,
+      },
+    });
+
     if (profileInfo.focusAreaId) {
       const getFocusArea = await this.focusArea.findOneBy({
         id: profileInfo.focusAreaId,
@@ -59,9 +66,35 @@ export class ExpertProfileService {
     }
 
     if (!userInfo) {
+      let starterPriceUrl;
+      if (profileInfo.starterPrice) {
+        starterPriceUrl = await this.stripeService.createPrice(
+          'Payment plan',
+          profileInfo.starterPrice * 100,
+        );
+      }
+
+      let bestPriceUrl;
+      if (profileInfo.bestPrice) {
+        bestPriceUrl = await this.stripeService.createPrice(
+          'Payment plan',
+          profileInfo.bestPrice * 100,
+        );
+      }
+
+      let recommendedPriceUrl;
+      if (profileInfo.recommendedPrice) {
+        recommendedPriceUrl = await this.stripeService.createPrice(
+          'Payment plan',
+          profileInfo.recommendedPrice * 100,
+        );
+      }
       return await this.expertProfileRepo.save({
         ...profileInfo,
         userId: id,
+        starterPriceUrl: starterPriceUrl && starterPriceUrl,
+        bestPriceUrl: bestPriceUrl && bestPriceUrl,
+        recommendedPriceUrl: recommendedPriceUrl && recommendedPriceUrl,
         createdDate: new Date(),
         updatedDate: new Date(),
       });

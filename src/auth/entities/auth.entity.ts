@@ -3,6 +3,7 @@ import { EducationalExperience } from 'src/expert-profile/entities/educational-e
 import { ExpertProfile } from 'src/expert-profile/entities/expert-profile.entity';
 import { Conversation } from 'src/messages/entity/conversation.entity';
 import { Message } from 'src/messages/entity/message.entity';
+import { Session } from 'src/session/entities/session.entity';
 import { Gender, UserRole } from 'src/utils/enum';
 import {
   Column,
@@ -85,4 +86,10 @@ export class User {
 
   @OneToMany(() => Message, (msg) => msg.receiver)
   receiver: Message[];
+
+  @OneToMany(() => Session, (session) => session.expert)
+  sessionExpert: Session[];
+
+  @OneToMany(() => Session, (session) => session.client)
+  sessionClient: Session[];
 }
