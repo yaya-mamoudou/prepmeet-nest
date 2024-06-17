@@ -4,9 +4,13 @@ import {
   Column,
   Entity,
   JoinColumn,
+  ManyToOne,
+  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { Message } from './message.entity';
+// import { Message } from './messages.entity';
 
 @Entity('conversation')
 export class Conversation {
@@ -16,14 +20,14 @@ export class Conversation {
   @Column({ nullable: true })
   initiatorId: number;
 
-  @OneToOne(() => User, (user) => user.initiator)
+  @ManyToOne(() => User, (user) => user.initiator)
   @JoinColumn({ name: 'initiatorId' })
   initiator: User;
 
   @Column({ nullable: true })
   initiatorWithUserId: number;
 
-  @OneToOne(() => User, (user) => user.initiatorWithUser)
+  @ManyToOne(() => User, (user) => user.initiatorWithUser)
   @JoinColumn({ name: 'initiatorWithUserId' })
   initiatorWithUser: User;
 
@@ -32,4 +36,7 @@ export class Conversation {
 
   @Column({ nullable: true })
   updatedDate: Date;
+
+  @OneToMany(() => Message, (message) => message.conversation)
+  message: Message[];
 }

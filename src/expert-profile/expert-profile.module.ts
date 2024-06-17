@@ -9,6 +9,7 @@ import { FocusArea } from './entities/focus-area.entity';
 import { Degrees } from './entities/degrees.entity';
 import { EducationalExperience } from './entities/educational-experience.entity';
 import { Certification } from './entities/certification.entity';
+import { StripeModule } from 'src/stripe/stripe.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { Certification } from './entities/certification.entity';
       EducationalExperience,
       Certification,
     ]),
+    StripeModule.forRootAsync(),
   ],
   providers: [ExpertProfileService, AtStrategy, RtStrategy, ExpertRoleStrategy],
   controllers: [ExpertProfileController],
