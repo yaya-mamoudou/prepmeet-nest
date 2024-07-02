@@ -10,6 +10,25 @@ export const ExpertProfileUpdateExample = {
   focusAreaId: 1,
 };
 
+export const ExpertAvailabilityExample = [
+  {
+    day: 'tuesday',
+    slot: [
+      {
+        from: '06:20',
+        to: '06:40',
+        availability: 'AVAILABLE',
+        slotId: 36,
+      },
+      {
+        from: '09:20',
+        to: '09:40',
+        availability: 'AVAILABLE',
+      },
+    ],
+  },
+];
+
 export const addEducationalExperience = {
   eduExp: [
     {

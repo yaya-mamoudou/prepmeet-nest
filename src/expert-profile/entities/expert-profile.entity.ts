@@ -8,15 +8,19 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { FocusArea } from './focus-area.entity';
+import { Slots } from 'src/utils/types';
 
 @Entity('expert-profile')
 export class ExpertProfile {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Column()
+  userId: number;
+
   @OneToOne(() => User, (user) => user.profile)
   @JoinColumn({ name: 'userId' })
-  userId: number;
+  user: User;
 
   @Column({ nullable: true })
   focusAreaId: number;
@@ -42,6 +46,15 @@ export class ExpertProfile {
 
   @Column({ nullable: true })
   bestPrice: number;
+
+  @Column({ nullable: true })
+  starterPriceUrl: string;
+
+  @Column({ nullable: true })
+  recommendedPriceUrl: string;
+
+  @Column({ nullable: true })
+  bestPriceUrl: string;
 
   @Column({ nullable: true })
   createdDate: Date;

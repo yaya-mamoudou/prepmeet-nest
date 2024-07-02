@@ -14,13 +14,20 @@ import { Certification } from './expert-profile/entities/certification.entity';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { VerificationCode } from './auth/entities/verification-code';
 import { VerificationEmail } from './auth/entities/verification-email';
-// import { VerificationEmail } from './auth/entities/verification-email';
 import { MessagesModule } from './messages/messages.module';
 import { Conversation } from './messages/entity/conversation.entity';
+import { PusherService } from './pusher/pusher.service';
+import { PusherModule } from './pusher/pusher.module';
+import { Message } from './messages/entity/message.entity';
+import { Session } from './session/entities/session.entity';
+import { SessionModule } from './session/session.module';
+import { StripeModule } from './stripe/stripe.module';
+import { ScheduleModule } from '@nestjs/schedule';
+import { Availability } from './session/entities/availability';
 
 @Module({
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, PusherService],
   imports: [
     AuthModule,
     ExpertProfileModule,
@@ -45,12 +52,15 @@ import { Conversation } from './messages/entity/conversation.entity';
           VerificationCode,
           VerificationEmail,
           Conversation,
+          Message,
+          Session,
+          Availability,
         ],
         synchronize: true,
       }),
     }),
     MailerModule.forRootAsync({
-      imports: [ConfigModule],
+      imports: [ConfigModule, ScheduleModule.forRoot()],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         transport: {
@@ -62,7 +72,11 @@ import { Conversation } from './messages/entity/conversation.entity';
         },
       }),
     }),
+    StripeModule.forRootAsync(),
     MessagesModule,
+    PusherModule,
+    SessionModule,
+    StripeModule,
   ],
 })
 export class AppModule {}

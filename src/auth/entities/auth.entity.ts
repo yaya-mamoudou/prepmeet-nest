@@ -2,6 +2,9 @@ import { Certification } from 'src/expert-profile/entities/certification.entity'
 import { EducationalExperience } from 'src/expert-profile/entities/educational-experience.entity';
 import { ExpertProfile } from 'src/expert-profile/entities/expert-profile.entity';
 import { Conversation } from 'src/messages/entity/conversation.entity';
+import { Message } from 'src/messages/entity/message.entity';
+import { Availability } from 'src/session/entities/availability';
+import { Session } from 'src/session/entities/session.entity';
 import { Gender, UserRole } from 'src/utils/enum';
 import {
   Column,
@@ -73,9 +76,24 @@ export class User {
   @OneToMany(() => Certification, (certification) => certification.userId)
   certificationId: Certification[];
 
-  @OneToOne(() => Conversation, (expert) => expert.initiatorId)
-  initiator: Conversation;
+  @OneToMany(() => Conversation, (conv) => conv.initiatorId)
+  initiator: Conversation[];
 
-  @OneToOne(() => Conversation, (expert) => expert.initiatorWithUserId)
-  initiatorWithUser: Conversation;
+  @OneToMany(() => Conversation, (conv) => conv.initiatorWithUserId)
+  initiatorWithUser: Conversation[];
+
+  @OneToMany(() => Message, (message) => message.sender)
+  sender: Message[];
+
+  @OneToMany(() => Message, (msg) => msg.receiver)
+  receiver: Message[];
+
+  @OneToMany(() => Session, (session) => session.expert)
+  sessionExpert: Session[];
+
+  @OneToMany(() => Session, (session) => session.client)
+  sessionClient: Session[];
+
+  @OneToMany(() => Availability, (availability) => availability.expert)
+  clientBooking: Availability[];
 }

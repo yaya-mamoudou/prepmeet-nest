@@ -15,6 +15,7 @@ import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ExpertProfileService } from './expert-profile.service';
 import { AuthGuard } from '@nestjs/passport';
 import {
+  ExpertAvailabilityExample,
   ExpertProfileUpdateExample,
   addCertification,
   addEducationalExperience,
@@ -24,6 +25,7 @@ import {
   AddEducationExperienceDto,
   UpdateExpertProfileDto,
   updateCertificationDto,
+  updateExpertAvailabilityDto,
 } from './dto/update-profile.dto';
 
 @Controller('expert-profile')
@@ -210,5 +212,26 @@ export class ExpertProfileController {
       certificationId,
       body,
     );
+  }
+
+  @Patch('update-availability')
+  @UsePipes(ValidationPipe)
+  @ApiBody({
+    type: updateExpertAvailabilityDto,
+    examples: {
+      ExpertProfileUpdateExample: {
+        value: ExpertAvailabilityExample,
+      },
+    },
+  })
+  @ApiOperation({ summary: 'Update availability' })
+  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('expert-role'))
+  updateExpertAvailability(
+    @Request() req: any,
+    @Body() profileInfo: updateExpertAvailabilityDto,
+  ) {
+    const user = req.user;
+    return this.expertProfileService.updateAvailability(user.uid, profileInfo);
   }
 }

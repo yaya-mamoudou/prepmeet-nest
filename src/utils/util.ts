@@ -7,3 +7,7 @@ export const hashText = (text: string) => {
 export const generateOtp = () => {
   return Math.floor(100000 + Math.random() * 900000);
 };
+
+export const delay = (ms: number) => {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+};

@@ -1,13 +1,23 @@
 import { IsEnum, IsNotEmpty } from 'class-validator';
 import { VisibilityLevel } from 'src/utils/enum';
+import { Slots } from 'src/utils/types';
 
 export class UpdateExpertProfileDto {
   about: string;
-
   videoUrl: string;
   @IsEnum(VisibilityLevel)
   visibilityLevel: VisibilityLevel;
   focusAreaId: number;
+  starterPrice: number;
+  recommendedPrice: number;
+  bestPrice: number;
+}
+
+export class updateExpertAvailabilityDto {
+  @IsNotEmpty()
+  day: string;
+  @IsNotEmpty()
+  slot: Slots[];
 }
 
 export class AddEducationExperienceDto {
@@ -42,8 +52,6 @@ export class AddCertificationDto {
 
 export class updateCertificationDto {
   name: string;
-
   year: string;
-
   certificationUrl: number;
 }
