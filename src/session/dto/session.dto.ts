@@ -1,4 +1,5 @@
 import { IsEnum, IsNotEmpty } from 'class-validator';
+import { Slots } from 'src/utils/types';
 
 export class CreateSessionDto {
   @IsNotEmpty()
@@ -13,15 +14,15 @@ export class CreateSessionDto {
   @IsNotEmpty()
   description: string;
 
-  @IsNotEmpty()
-  duration: number;
+  // @IsNotEmpty()
+  // duration: number;
+
+  // @IsNotEmpty()
+  // startTime: Date;
 
   @IsNotEmpty()
-  startTime: Date;
+  slot: Slots[];
 
-  @IsNotEmpty()
-  endTime: Date;
-
-  @IsNotEmpty()
-  numberOfSlots: number;
+  // @IsNotEmpty()
+  // numberOfSlots: number;
 }

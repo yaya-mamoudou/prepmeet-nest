@@ -8,6 +8,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { FocusArea } from './focus-area.entity';
+import { Slots } from 'src/utils/types';
 
 @Entity('expert-profile')
 export class ExpertProfile {

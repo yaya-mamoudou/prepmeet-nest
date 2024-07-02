@@ -16,11 +16,13 @@ import { SessionStatus, StripePaymentStatus, UserRole } from 'src/utils/enum';
 import { StripeService } from 'src/stripe/stripe.service';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import * as moment from 'moment';
+import { ExpertProfileService } from 'src/expert-profile/expert-profile.service';
 
 @Injectable()
 export class SessionService {
   constructor(
     private readonly authService: AuthService,
+    private readonly expertProfileService: ExpertProfileService,
     @InjectRepository(Session)
     private sessionRepo: Repository<Session>,
     private pusherService: PusherService,
@@ -28,6 +30,7 @@ export class SessionService {
   ) {}
 
   async createSession(body: CreateSessionDto, user: JwtContent) {
+    let response = [];
     const expert = await this.authService.getUserById(body.expertId);
     if (expert?.role !== UserRole.expert) {
       throw new HttpException(
@@ -35,20 +38,64 @@ export class SessionService {
         HttpStatus.BAD_REQUEST,
       );
     }
+
     const stripeSession = await this.stripeService.createCheckoutSession(
       body.pricingUrl,
-      body.numberOfSlots,
+      body.slot.length,
     );
 
-    return await this.sessionRepo.save({
-      ...body,
-      price: stripeSession.amount_total / 100,
-      clientId: user.uid,
-      paymentUrl: stripeSession.url,
-      createdDate: new Date(),
-      updatedDate: new Date(),
-      stripeSessionId: stripeSession.id,
-    });
+    for (let i = 0; i < body.slot.length; i++) {
+      const weekDay = moment(body.slot[i].meetingDate)
+        .format('dddd')
+        .toLocaleLowerCase();
+
+      const expertsAvailabilitySlot =
+        await this.expertProfileService.getSlotBySlotAndDay(
+          weekDay,
+          body.slot[i].from,
+          body.slot[i].to,
+        );
+
+      if (!expertsAvailabilitySlot) {
+        response.push(
+          `This expert isn't available at this time ${weekDay} from:${body.slot[i].from}, to:${body.slot[i].to}`,
+        );
+        continue;
+      }
+
+      const session = await this.getSessionBySlotInfo(
+        body.slot[i].meetingDate,
+        body.slot[i].from,
+        body.slot[i].to,
+      );
+
+      if (session) {
+        response.push(
+          `This session already exists ${weekDay} from:${body.slot[i].from}, to:${body.slot[i].to}`,
+        );
+        continue;
+      }
+
+      if (!body.slot[i].from || !body.slot[i].to || !body.slot[i].meetingDate) {
+        continue;
+      }
+      await this.sessionRepo.save({
+        ...body,
+        price: stripeSession.amount_total / 100,
+        clientId: user.uid,
+        paymentUrl: stripeSession.url,
+        createdDate: new Date(),
+        updatedDate: new Date(),
+        stripeSessionId: stripeSession.id,
+        meetingDate: body.slot[i].meetingDate,
+        slot: {
+          from: body.slot[i].from,
+          to: body.slot[i].to,
+        },
+      });
+    }
+
+    return response;
   }
 
   async getAllSessions(user: JwtContent) {
@@ -136,5 +183,17 @@ export class SessionService {
 
       await this.sessionRepo.update(session.id, data);
     }
+  }
+
+  async getSessionBySlotInfo(date: Date, from: string, to: string) {
+    return this.sessionRepo
+      .createQueryBuilder('session')
+      .where('session.meetingDate = :meetingDate', { meetingDate: date })
+      .andWhere('JSON_EXTRACT(session.slot, "$.from") = :from', { from })
+      .andWhere('JSON_EXTRACT(session.slot, "$.to") = :to', { to })
+      .andWhere('session.status NOT IN (:excludedStatuses)', {
+        excludedStatuses: ['CANCELED', 'EXPIRED'],
+      })
+      .getOne();
   }
 }

@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Patch,
   Post,
   Request,
   UseGuards,
@@ -13,6 +14,7 @@ import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { CreateSessionDto } from './dto/session.dto';
 import { CreateSessionExample } from 'src/auth/examples/session';
+import { Availability } from './entities/availability';
 
 @Controller('session')
 @ApiTags('Session')
@@ -42,7 +44,7 @@ export class SessionController {
   @ApiOperation({
     summary: 'Get all users sessions',
   })
-  getAllMessages(@Request() req: any) {
+  getAllSessions(@Request() req: any) {
     const user = req.user;
     return this.sessionService.getAllSessions(user);
   }

@@ -1,5 +1,6 @@
 import { User } from 'src/auth/entities/auth.entity';
 import { SessionStatus } from 'src/utils/enum';
+import { Slots } from 'src/utils/types';
 import {
   Column,
   Entity,
@@ -26,16 +27,19 @@ export class Session {
   description: string;
 
   @Column()
-  duration: number;
+  meetingDate: Date;
 
   @Column({ nullable: true })
   meetingUrl: string;
 
-  @Column()
-  startTime: Date;
+  // @Column()
+  // startTime: Date;
 
-  @Column()
-  endTime: Date;
+  // @Column()
+  // endTime: Date;
+
+  @Column({ type: 'json' })
+  slot: Slots;
 
   @Column({ type: 'varchar', length: 1024, nullable: true })
   paymentUrl: string;

@@ -8,6 +8,7 @@ import {
   UpdateExpertProfileDto,
   updateCertificationDto,
   updateEducationExperienceDto,
+  updateExpertAvailabilityDto,
 } from './dto/update-profile.dto';
 import { FocusArea } from './entities/focus-area.entity';
 import { EducationalExperience } from './entities/educational-experience.entity';
@@ -15,6 +16,8 @@ import { Degrees } from './entities/degrees.entity';
 import { Certificate } from 'crypto';
 import { Certification } from './entities/certification.entity';
 import { StripeService } from 'src/stripe/stripe.service';
+import { Availability } from 'src/session/entities/availability';
+import { DaysArray } from 'src/utils/types';
 
 @Injectable()
 export class ExpertProfileService {
@@ -30,6 +33,8 @@ export class ExpertProfileService {
     @InjectRepository(Certification)
     private certificateRepo: Repository<Certification>,
     private stripeService: StripeService,
+    @InjectRepository(Availability)
+    private availabilityRepo: Repository<Availability>,
   ) {}
 
   async getExpertProfile(id: number) {
@@ -39,7 +44,13 @@ export class ExpertProfileService {
   }
 
   async getExpertProfileById(id: number) {
-    return await this.expertProfileRepo.find({
+    console.log(id);
+
+    const availability = await this.getExpertAvailability(Number(id));
+    const certificate = await this.getCertificationById(Number(id));
+    const education = await this.getExpertsEducationById(Number(id));
+
+    const profileInfo = await this.expertProfileRepo.find({
       where: {
         userId: Number(id),
       },
@@ -47,6 +58,9 @@ export class ExpertProfileService {
         focusArea: true,
       },
     });
+    console.log(profileInfo, availability);
+
+    return { profileInfo, certificate, availability, education };
   }
 
   async updateExpertProfile(id: number, profileInfo: UpdateExpertProfileDto) {
@@ -204,5 +218,77 @@ export class ExpertProfileService {
       educationalExpId,
       body,
     );
+  }
+
+  async updateAvailability(
+    expertId: number,
+    body: updateExpertAvailabilityDto,
+  ) {
+    if (!DaysArray?.includes(body.day)) {
+      throw new HttpException(
+        `Ensure the day format is correct`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    for (let i = 0; i < body.slot.length; i++) {
+      console.table(body.slot[i]);
+      console.log('table');
+
+      if (
+        !body.slot[i].from ||
+        !body.slot[i].to ||
+        (body.slot[i].availability !== 'AVAILABLE' &&
+          body.slot[i].availability !== 'NOT_AVAILABLE')
+      ) {
+        continue;
+      }
+
+      if (!body.slot[i].slotId) {
+        const data = await this.availabilityRepo.save({
+          expertId: expertId,
+          slot: {
+            from: body.slot[i].from,
+            to: body.slot[i].to,
+            availability: body.slot[i].availability,
+          },
+          day: body.day,
+        });
+
+        continue;
+      }
+
+      const slot = await this.getSlotById(body?.slot?.[i]?.slotId);
+      if (!slot) {
+        continue;
+        // throw new HttpException(`Invalid slot id`, HttpStatus.BAD_REQUEST);
+      }
+      await this.removeSlotById(body.slot[i].slotId);
+    }
+    return 'Update completed';
+  }
+
+  async getSlotById(id: number) {
+    return this.availabilityRepo.findOneBy({ id: id });
+  }
+
+  async getSlotBySlotAndDay(day: string, from: string, to: string) {
+    return this.availabilityRepo
+      .createQueryBuilder('availability')
+      .where('availability.day = :day', { day })
+      .andWhere('JSON_EXTRACT(availability.slot, "$.from") = :from', { from })
+      .andWhere('JSON_EXTRACT(availability.slot, "$.to") = :to', { to })
+      .getOne();
+  }
+
+  async removeSlotById(id: number) {
+    return this.availabilityRepo.delete({ id: id });
+  }
+
+  async getExpertAvailability(expertId: number) {
+    return this.availabilityRepo.find({
+      where: {
+        expertId: expertId,
+      },
+    });
   }
 }

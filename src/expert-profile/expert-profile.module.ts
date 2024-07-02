@@ -10,6 +10,7 @@ import { Degrees } from './entities/degrees.entity';
 import { EducationalExperience } from './entities/educational-experience.entity';
 import { Certification } from './entities/certification.entity';
 import { StripeModule } from 'src/stripe/stripe.module';
+import { Availability } from 'src/session/entities/availability';
 
 @Module({
   imports: [
@@ -19,10 +20,12 @@ import { StripeModule } from 'src/stripe/stripe.module';
       Degrees,
       EducationalExperience,
       Certification,
+      Availability,
     ]),
     StripeModule.forRootAsync(),
   ],
   providers: [ExpertProfileService, AtStrategy, RtStrategy, ExpertRoleStrategy],
   controllers: [ExpertProfileController],
+  exports: [ExpertProfileService],
 })
 export class ExpertProfileModule {}

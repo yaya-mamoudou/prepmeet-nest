@@ -23,6 +23,7 @@ import { Session } from './session/entities/session.entity';
 import { SessionModule } from './session/session.module';
 import { StripeModule } from './stripe/stripe.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { Availability } from './session/entities/availability';
 
 @Module({
   controllers: [AppController],
@@ -53,6 +54,7 @@ import { ScheduleModule } from '@nestjs/schedule';
           Conversation,
           Message,
           Session,
+          Availability,
         ],
         synchronize: true,
       }),
