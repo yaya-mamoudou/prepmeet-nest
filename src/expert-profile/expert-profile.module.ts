@@ -11,6 +11,7 @@ import { EducationalExperience } from './entities/educational-experience.entity'
 import { Certification } from './entities/certification.entity';
 import { StripeModule } from 'src/stripe/stripe.module';
 import { Availability } from 'src/session/entities/availability';
+import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
   imports: [
@@ -23,9 +24,10 @@ import { Availability } from 'src/session/entities/availability';
       Availability,
     ]),
     StripeModule.forRootAsync(),
+    AuthModule
   ],
   providers: [ExpertProfileService, AtStrategy, RtStrategy, ExpertRoleStrategy],
   controllers: [ExpertProfileController],
   exports: [ExpertProfileService],
 })
-export class ExpertProfileModule {}
+export class ExpertProfileModule { }

@@ -18,6 +18,8 @@ import { Certification } from './entities/certification.entity';
 import { StripeService } from 'src/stripe/stripe.service';
 import { Availability } from 'src/session/entities/availability';
 import { DaysArray } from 'src/utils/types';
+import { AuthService } from 'src/auth/auth.service';
+import { UserRole } from 'src/utils/enum';
 
 @Injectable()
 export class ExpertProfileService {
@@ -35,7 +37,8 @@ export class ExpertProfileService {
     private stripeService: StripeService,
     @InjectRepository(Availability)
     private availabilityRepo: Repository<Availability>,
-  ) {}
+    private readonly authService: AuthService
+  ) { }
 
   async getExpertProfile(id: number) {
     return await this.expertProfileRepo.findOneBy({
@@ -61,6 +64,10 @@ export class ExpertProfileService {
     console.log(profileInfo, availability);
 
     return { profileInfo, certificate, availability, education };
+  }
+
+  async getAllExperts() {
+    return await this.authService.getAllUserByRole(UserRole.expert)
   }
 
   async updateExpertProfile(id: number, profileInfo: UpdateExpertProfileDto) {

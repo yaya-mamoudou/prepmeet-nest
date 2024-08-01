@@ -31,7 +31,7 @@ import {
 @Controller('expert-profile')
 @ApiTags('Expert Profile')
 export class ExpertProfileController {
-  constructor(private readonly expertProfileService: ExpertProfileService) {}
+  constructor(private readonly expertProfileService: ExpertProfileService) { }
 
   @Get()
   @ApiOperation({ summary: 'Get currently signed in expert profile' })
@@ -39,6 +39,15 @@ export class ExpertProfileController {
   getExpertProfile(@Request() req: any) {
     const user = req.user;
     return this.expertProfileService.getExpertProfile(user.uid);
+  }
+
+
+  @Get("/experts")
+  @ApiOperation({ summary: 'Get currently signed in expert profile' })
+  @UseGuards(AuthGuard('jwt'))
+  getAll(@Request() req: any) {
+    const user = req.user;
+    return this.expertProfileService.getAllExperts();
   }
 
   @Get('/:expertId')

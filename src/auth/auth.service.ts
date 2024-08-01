@@ -37,7 +37,7 @@ export class AuthService {
     private verificationCodeRepo: Repository<VerificationCode>,
     @InjectRepository(VerificationEmail)
     private verificationEmailRepo: Repository<VerificationEmail>,
-  ) {}
+  ) { }
 
   async registerUser(user: RegisterDto) {
     const userDetails = await this.userRepo.findOneBy({ email: user.email });
@@ -85,10 +85,11 @@ export class AuthService {
       updatedDate: new Date(),
       password: hashText(user.password),
     });
+
     const tokens = await this.getToken(newUser);
     // await this.updateRTHash(newUser.id, tokens.refeshToken);
     await this.userRepo.save(data);
-    return tokens;
+    return { ...tokens, user: newUser };
   }
 
   async googleSignup(body: SocialRegistrationDto) {
@@ -145,7 +146,7 @@ export class AuthService {
     return tokens;
   }
 
-  async facebookSignup() {}
+  async facebookSignup() { }
 
   async login(user: LoginDto) {
     const userDetails = await this.userRepo.findOneBy({ email: user.email });
@@ -160,7 +161,7 @@ export class AuthService {
 
     const tokens = await this.getToken(userDetails);
 
-    return tokens;
+    return { ...tokens, user: userDetails };
   }
 
   async getToken(user: User): Promise<JWTTokens> {
@@ -379,5 +380,13 @@ export class AuthService {
 
   async resetPassword(id: number, password: string) {
     return await this.userRepo.update(id, { password: hashText(password) });
+  }
+
+  async getAllUserByRole(role: UserRole) {
+    return await this.userRepo.find({
+      where: {
+        role: role
+      }
+    })
   }
 }
