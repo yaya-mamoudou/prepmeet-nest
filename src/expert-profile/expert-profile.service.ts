@@ -50,7 +50,6 @@ export class ExpertProfileService {
     const availability = await this.getExpertAvailability(Number(id));
     const certificate = await this.getCertificationById(Number(id));
     const education = await this.getExpertsEducationById(Number(id));
-
     const profileInfo = await this.expertProfileRepo.findOne({
       where: {
         userId: Number(id),
@@ -59,8 +58,9 @@ export class ExpertProfileService {
         focusArea: true,
       },
     });
+    const user = await this.authService.getUserById(id);
 
-    return { profileInfo, certificate, availability, education };
+    return { profileInfo, user, certificate, availability, education };
   }
 
   async getAllExperts() {
