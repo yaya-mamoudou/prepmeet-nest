@@ -73,7 +73,8 @@ export class MessagesService {
   }
 
   async getAllConversation(user: JwtContent) {
-    return this.conversationRepo
+    const conversationArray = [];
+    const conversations = await this.conversationRepo
       .createQueryBuilder('conversation')
       .where(
         '(conversation.initiatorWithUserId = :userId OR conversation.initiatorId = :userId)',
@@ -83,6 +84,16 @@ export class MessagesService {
       .leftJoinAndSelect('conversation.initiatorWithUser', 'initiatorWithUser')
       .addOrderBy('conversation.updatedDate', 'DESC')
       .getMany();
+
+    for (let i = 0; i < conversations.length; i++) {
+      let message = await this.getLastMessage(conversations[i].id);
+      conversationArray.push({
+        ...conversations[i],
+        message,
+      });
+    }
+
+    return conversationArray;
   }
 
   async sendMessage(body: SendMessageDto, user: JwtContent) {
@@ -149,6 +160,17 @@ export class MessagesService {
     return this.messageRepo.find({
       where: {
         conversationId: id,
+      },
+      order: {
+        updatedDate: 'ASC',
+      },
+    });
+  }
+
+  async getLastMessage(conversationId) {
+    return this.messageRepo.findOne({
+      where: {
+        conversationId: conversationId,
       },
       order: {
         updatedDate: 'DESC',
