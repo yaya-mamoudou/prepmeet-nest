@@ -1,4 +1,10 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+  forwardRef,
+} from '@nestjs/common';
 import { User } from './entities/auth.entity';
 import {
   LoginDto,
@@ -20,6 +26,9 @@ import { VerificationCode } from './entities/verification-code';
 import * as moment from 'moment';
 import { VerificationEmail } from './entities/verification-email';
 import axios from 'axios';
+import { JwtContent } from 'src/utils/types';
+import { ExpertProfile } from 'src/expert-profile/entities/expert-profile.entity';
+import { AppModule } from 'src/app.module';
 
 export interface JWTTokens {
   accessToken: string;
@@ -37,21 +46,23 @@ export class AuthService {
     private verificationCodeRepo: Repository<VerificationCode>,
     @InjectRepository(VerificationEmail)
     private verificationEmailRepo: Repository<VerificationEmail>,
-  ) { }
+    @InjectRepository(ExpertProfile)
+    private expertProfileRepo: Repository<ExpertProfile>,
+  ) {}
 
   async registerUser(user: RegisterDto) {
     const userDetails = await this.userRepo.findOneBy({ email: user.email });
     if (userDetails) {
       throw new HttpException(
         `Email address already in use, please try again with another email`,
-        HttpStatus.CONFLICT,
+        HttpStatus.UNAUTHORIZED,
       );
     }
 
     const pattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/;
     if (!pattern.test(user.password)) {
       throw new HttpException(
-        `Password much contain at least 1 uppercase, 1 lower case and one number`,
+        `Password must contain at least 1 uppercase, 1 lower case and one number`,
         HttpStatus.BAD_REQUEST,
       );
     }
@@ -64,9 +75,13 @@ export class AuthService {
     }
 
     if (user.role === UserRole.expert) {
-      if (!user.phoneNumber) {
+      if (
+        !user.phoneNumber ||
+        !user.focusAreaId ||
+        !user.doesUserHasCloudOrDevopsCertification
+      ) {
         throw new HttpException(
-          `Phone number is required`,
+          `One or more fields are missing, Phone number, Focus Area or Cloud certification`,
           HttpStatus.BAD_REQUEST,
         );
       }
@@ -79,16 +94,19 @@ export class AuthService {
       password: hashText(user.password),
     };
 
-    const newUser = await this.userRepo.create({
-      ...user,
-      createdDate: new Date(),
-      updatedDate: new Date(),
-      password: hashText(user.password),
-    });
-
+    let newUser = await this.userRepo.save(data);
     const tokens = await this.getToken(newUser);
-    // await this.updateRTHash(newUser.id, tokens.refeshToken);
-    await this.userRepo.save(data);
+
+    if (user.role === UserRole.expert) {
+      let expert = await this.expertProfileRepo.save({
+        userId: newUser.id,
+        focusAreaId: user.focusAreaId,
+        doesUserHasCloudOrDevopsCertification:
+          user.doesUserHasCloudOrDevopsCertification,
+      });
+      newUser = { ...newUser, ...expert };
+    }
+
     return { ...tokens, user: newUser };
   }
 
@@ -105,7 +123,7 @@ export class AuthService {
     if (userDetails) {
       throw new HttpException(
         `Email address already in use, please try again with another email`,
-        HttpStatus.CONFLICT,
+        HttpStatus.UNAUTHORIZED,
       );
     }
 
@@ -122,7 +140,7 @@ export class AuthService {
     });
     const tokens = await this.getToken(newUser);
     await this.userRepo.save(newUser);
-    return tokens;
+    return { ...tokens, user: newUser };
   }
 
   async googleLogin(body: SocialLoginDto) {
@@ -138,15 +156,15 @@ export class AuthService {
     if (!userDetails) {
       throw new HttpException(
         `Invalid login credentials, ensure you are sending the right email and password and try again`,
-        HttpStatus.CONFLICT,
+        HttpStatus.UNAUTHORIZED,
       );
     }
 
     const tokens = await this.getToken(userDetails);
-    return tokens;
+    return { ...tokens, user: userDetails };
   }
 
-  async facebookSignup() { }
+  async facebookSignup() {}
 
   async login(user: LoginDto) {
     const userDetails = await this.userRepo.findOneBy({ email: user.email });
@@ -155,7 +173,7 @@ export class AuthService {
     if (!userDetails || passwordValidation !== userDetails.password) {
       throw new HttpException(
         `Invalid login credentials, ensure you are sending the right email and password and try again`,
-        HttpStatus.CONFLICT,
+        HttpStatus.UNAUTHORIZED,
       );
     }
 
@@ -216,9 +234,9 @@ export class AuthService {
     });
   }
 
-  async getLoggedInUser(user: User) {
+  async getLoggedInUser(user: JwtContent) {
     return await this.userRepo.findOneBy({
-      id: user.id,
+      id: user.uid,
     });
   }
 
@@ -385,8 +403,8 @@ export class AuthService {
   async getAllUserByRole(role: UserRole) {
     return await this.userRepo.find({
       where: {
-        role: role
-      }
-    })
+        role: role,
+      },
+    });
   }
 }

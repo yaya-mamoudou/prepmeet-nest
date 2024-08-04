@@ -11,9 +11,10 @@ import {
 import { StripeService } from './stripe.service';
 import { CreatePriceDto } from './dto/stripe.dto';
 import { AuthGuard } from '@nestjs/passport';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 @Controller('stripe')
+@ApiBearerAuth()
 @ApiTags('Stripe payment')
 export class StripeController {
   constructor(private stripeService: StripeService) {}

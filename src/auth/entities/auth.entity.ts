@@ -3,6 +3,7 @@ import { EducationalExperience } from 'src/expert-profile/entities/educational-e
 import { ExpertProfile } from 'src/expert-profile/entities/expert-profile.entity';
 import { Conversation } from 'src/messages/entity/conversation.entity';
 import { Message } from 'src/messages/entity/message.entity';
+import { Review } from 'src/review/entities/review.entity';
 import { Availability } from 'src/session/entities/availability';
 import { Session } from 'src/session/entities/session.entity';
 import { Gender, UserRole } from 'src/utils/enum';
@@ -96,4 +97,10 @@ export class User {
 
   @OneToMany(() => Availability, (availability) => availability.expert)
   clientBooking: Availability[];
+
+  @OneToMany(() => Review, (review) => review.reviewer)
+  review: Review[];
+
+  @OneToMany(() => Review, (review) => review.expert)
+  expert: Review[];
 }

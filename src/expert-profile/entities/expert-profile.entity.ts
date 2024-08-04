@@ -57,6 +57,9 @@ export class ExpertProfile {
   bestPriceUrl: string;
 
   @Column({ nullable: true })
+  doesUserHasCloudOrDevopsCertification: boolean;
+
+  @Column({ nullable: true })
   createdDate: Date;
 
   @Column({ nullable: true })
