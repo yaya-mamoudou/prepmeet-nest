@@ -28,8 +28,8 @@ import {
   updateExpertAvailabilityDto,
 } from './dto/update-profile.dto';
 
-@Controller('expert-profile')
-@ApiTags('Expert Profile')
+@Controller('expert')
+@ApiTags('Expert')
 export class ExpertProfileController {
   constructor(private readonly expertProfileService: ExpertProfileService) { }
 
@@ -42,9 +42,9 @@ export class ExpertProfileController {
   }
 
 
-  @Get("/experts")
-  @ApiOperation({ summary: 'Get currently signed in expert profile' })
-  @UseGuards(AuthGuard('jwt'))
+  @Get("/list")
+  @ApiOperation({ summary: 'Get list of experts' })
+  // @UseGuards(AuthGuard('jwt'))
   getAll(@Request() req: any) {
     const user = req.user;
     return this.expertProfileService.getAllExperts();
@@ -52,13 +52,13 @@ export class ExpertProfileController {
 
   @Get('/:expertId')
   @ApiOperation({ summary: 'Get expert profile by ID' })
-  @UseGuards(AuthGuard('jwt'))
+  // @UseGuards(AuthGuard('jwt'))
   getExpertProfileById(@Param('expertId') expertId: number) {
     return this.expertProfileService.getExpertProfileById(expertId);
   }
 
   @Patch('')
-  @ApiOperation({ summary: 'Update expert profile' })
+  @ApiOperation({ summary: 'Update current expert profile' })
   @UseGuards(AuthGuard('jwt'))
   @UseGuards(AuthGuard('expert-role'))
   @UsePipes(ValidationPipe)
