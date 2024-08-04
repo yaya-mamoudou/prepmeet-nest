@@ -11,7 +11,7 @@ import {
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ExpertProfileService } from './expert-profile.service';
 import { AuthGuard } from '@nestjs/passport';
 import {
@@ -29,9 +29,10 @@ import {
 } from './dto/update-profile.dto';
 
 @Controller('expert-profile')
+@ApiBearerAuth()
 @ApiTags('Expert Profile')
 export class ExpertProfileController {
-  constructor(private readonly expertProfileService: ExpertProfileService) { }
+  constructor(private readonly expertProfileService: ExpertProfileService) {}
 
   @Get()
   @ApiOperation({ summary: 'Get currently signed in expert profile' })
@@ -41,8 +42,7 @@ export class ExpertProfileController {
     return this.expertProfileService.getExpertProfile(user.uid);
   }
 
-
-  @Get("/experts")
+  @Get('/experts')
   @ApiOperation({ summary: 'Get currently signed in expert profile' })
   @UseGuards(AuthGuard('jwt'))
   getAll(@Request() req: any) {

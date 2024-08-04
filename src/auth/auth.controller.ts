@@ -19,7 +19,13 @@ import {
   SocialLoginDto,
   SocialRegistrationDto,
 } from './dto/auth.dto';
-import { ApiBody, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiOperation,
+  ApiParam,
+  ApiTags,
+} from '@nestjs/swagger';
 import {
   AuthPasswordResetExample,
   ClientSignupExample,
@@ -33,6 +39,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { SocialAuthenticationParam } from 'src/utils/enum';
 
 @Controller('auth')
+@ApiBearerAuth()
 @ApiTags('Authentication')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}

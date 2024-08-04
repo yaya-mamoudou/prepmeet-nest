@@ -10,13 +10,20 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { SessionService } from './session.service';
-import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { CreateSessionDto } from './dto/session.dto';
 import { CreateSessionExample } from 'src/auth/examples/session';
 import { Availability } from './entities/availability';
 
 @Controller('session')
+@ApiBearerAuth()
 @ApiTags('Session')
 export class SessionController {
   constructor(private readonly sessionService: SessionService) {}

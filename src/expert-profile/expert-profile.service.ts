@@ -37,8 +37,8 @@ export class ExpertProfileService {
     private stripeService: StripeService,
     @InjectRepository(Availability)
     private availabilityRepo: Repository<Availability>,
-    private readonly authService: AuthService
-  ) { }
+    private readonly authService: AuthService,
+  ) {}
 
   async getExpertProfile(id: number) {
     return await this.expertProfileRepo.findOneBy({
@@ -47,13 +47,11 @@ export class ExpertProfileService {
   }
 
   async getExpertProfileById(id: number) {
-    console.log(id);
-
     const availability = await this.getExpertAvailability(Number(id));
     const certificate = await this.getCertificationById(Number(id));
     const education = await this.getExpertsEducationById(Number(id));
 
-    const profileInfo = await this.expertProfileRepo.find({
+    const profileInfo = await this.expertProfileRepo.findOne({
       where: {
         userId: Number(id),
       },
@@ -61,13 +59,12 @@ export class ExpertProfileService {
         focusArea: true,
       },
     });
-    console.log(profileInfo, availability);
 
     return { profileInfo, certificate, availability, education };
   }
 
   async getAllExperts() {
-    return await this.authService.getAllUserByRole(UserRole.expert)
+    return await this.authService.getAllUserByRole(UserRole.expert);
   }
 
   async updateExpertProfile(id: number, profileInfo: UpdateExpertProfileDto) {
@@ -297,5 +294,9 @@ export class ExpertProfileService {
         expertId: expertId,
       },
     });
+  }
+
+  async getFocusArea() {
+    return this.focusArea.find();
   }
 }

@@ -113,7 +113,7 @@ export class SessionService {
       .getMany();
   }
 
-  @Cron(CronExpression.EVERY_5_MINUTES)
+  // @Cron(CronExpression.EVERY_5_MINUTES)
   async checkPaymentStatus() {
     console.log('runing cron');
 

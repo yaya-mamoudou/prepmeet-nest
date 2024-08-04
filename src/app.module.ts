@@ -27,6 +27,8 @@ import { Availability } from './session/entities/availability';
 import { GoogleModule } from './google/google.module';
 import { GoogleRefreshToken } from './google/entities/google-refresh-token';
 import { DocumentManagementModule } from './document-management/document-management.module';
+import { ReviewModule } from './review/review.module';
+import { Review } from './review/entities/review.entity';
 
 @Module({
   controllers: [AppController],
@@ -60,6 +62,7 @@ import { DocumentManagementModule } from './document-management/document-managem
           Session,
           Availability,
           GoogleRefreshToken,
+          Review,
         ],
         synchronize: true,
       }),
@@ -83,6 +86,7 @@ import { DocumentManagementModule } from './document-management/document-managem
     SessionModule,
     StripeModule,
     DocumentManagementModule,
+    ReviewModule,
   ],
 })
 export class AppModule {}

@@ -8,9 +8,10 @@ import {
 } from '@nestjs/common';
 import { GoogleService } from './google.service';
 import { AuthGuard } from '@nestjs/passport';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 @Controller('google')
+@ApiBearerAuth()
 @ApiTags('Google')
 export class GoogleController {
   constructor(private readonly googleService: GoogleService) {}
