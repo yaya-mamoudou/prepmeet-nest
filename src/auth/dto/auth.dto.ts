@@ -38,6 +38,8 @@ export class RegisterDto {
   profilePhoto: string;
   dateOfBirth: Date;
   phoneNumber: string;
+  focusAreaId: number;
+  doesUserHasCloudOrDevopsCertification: boolean;
 }
 
 export class SocialRegistrationDto {

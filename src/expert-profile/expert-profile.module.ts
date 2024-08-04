@@ -24,10 +24,10 @@ import { AuthModule } from 'src/auth/auth.module';
       Availability,
     ]),
     StripeModule.forRootAsync(),
-    AuthModule
+    AuthModule,
   ],
   providers: [ExpertProfileService, AtStrategy, RtStrategy, ExpertRoleStrategy],
   controllers: [ExpertProfileController],
   exports: [ExpertProfileService],
 })
-export class ExpertProfileModule { }
+export class ExpertProfileModule {}

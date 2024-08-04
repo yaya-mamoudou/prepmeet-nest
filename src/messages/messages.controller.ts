@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { MessagesService } from './messages.service';
 import { CreateConversationDto } from './dto/conversation.dto';
-import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { SendMessageDto } from './dto/message.dto';
 import {
@@ -20,6 +20,7 @@ import {
 } from 'src/auth/examples/message';
 
 @Controller('messages')
+@ApiBearerAuth()
 @ApiTags('Messages')
 export class MessagesController {
   constructor(private readonly messagesService: MessagesService) {}

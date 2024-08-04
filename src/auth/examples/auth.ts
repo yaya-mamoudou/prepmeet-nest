@@ -1,6 +1,6 @@
 export const ClientSignupExample = {
-  firstname: 'Jone',
-  lastname: 'Done',
+  firstName: 'Jone',
+  lastName: 'Done',
   email: 'jone@gmail.con',
   password: 'Jone123#',
   role: `client | expert`,
@@ -8,21 +8,23 @@ export const ClientSignupExample = {
 };
 
 export const ExpertSignupExample = {
-  firstname: 'Jone',
-  lastname: 'Done',
+  firstName: 'Jone',
+  lastName: 'Done',
   email: 'jone@gmail.con',
   password: 'Jone123#',
   role: 'expert',
   phoneNumber: '+237675979594',
   hasAcceptedTerms: true,
+  focusAreaId: 1,
+  doesUserHasCloudOrDevopsCertification: true,
 };
 
 export const SocialSignupExample = {
-  firstname: 'Jone',
-  lastname: 'Done',
-  email: 'jone@gmail.con',
-  accessToken: 'token here',
-  emailVerified: true,
+  // firstname: 'Jone',
+  // lastname: 'Done',
+  // email: 'jone@gmail.con',
+  // emailVerified: true,
+  accessToken: 'GOOGLE access token here',
   role: `client | expert`,
   hasAcceptedTerms: true,
 };
