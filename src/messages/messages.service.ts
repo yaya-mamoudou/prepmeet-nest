@@ -92,7 +92,6 @@ export class MessagesService {
         message,
       });
     }
-
     return conversationArray;
   }
 
