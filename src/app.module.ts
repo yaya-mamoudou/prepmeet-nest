@@ -24,12 +24,16 @@ import { SessionModule } from './session/session.module';
 import { StripeModule } from './stripe/stripe.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { Availability } from './session/entities/availability';
+import { GoogleModule } from './google/google.module';
+import { GoogleRefreshToken } from './google/entities/google-refresh-token';
+import { DocumentManagementModule } from './document-management/document-management.module';
 
 @Module({
   controllers: [AppController],
   providers: [AppService, PusherService],
   imports: [
     AuthModule,
+    GoogleModule,
     ExpertProfileModule,
     ConfigModule.forRoot(),
     TypeOrmModule.forRootAsync({
@@ -55,6 +59,7 @@ import { Availability } from './session/entities/availability';
           Message,
           Session,
           Availability,
+          GoogleRefreshToken,
         ],
         synchronize: true,
       }),
@@ -77,6 +82,7 @@ import { Availability } from './session/entities/availability';
     PusherModule,
     SessionModule,
     StripeModule,
+    DocumentManagementModule,
   ],
 })
 export class AppModule {}

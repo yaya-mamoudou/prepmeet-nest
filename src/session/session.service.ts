@@ -17,6 +17,8 @@ import { StripeService } from 'src/stripe/stripe.service';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import * as moment from 'moment';
 import { ExpertProfileService } from 'src/expert-profile/expert-profile.service';
+import { GoogleService } from 'src/google/google.service';
+import { generateRandomString } from 'src/utils/util';
 
 @Injectable()
 export class SessionService {
@@ -27,6 +29,7 @@ export class SessionService {
     private sessionRepo: Repository<Session>,
     private pusherService: PusherService,
     private stripeService: StripeService,
+    private googleService: GoogleService,
   ) {}
 
   async createSession(body: CreateSessionDto, user: JwtContent) {
@@ -112,6 +115,8 @@ export class SessionService {
 
   @Cron(CronExpression.EVERY_5_MINUTES)
   async checkPaymentStatus() {
+    console.log('runing cron');
+
     const expirationTimeInMinutes = 30;
 
     const allPendingSessions = await this.sessionRepo.find({
@@ -153,11 +158,62 @@ export class SessionService {
         paymentResponse.status === StripePaymentStatus.complete &&
         paymentResponse.payment_status === 'paid'
       ) {
+        const expert = await this.authService.getUserById(session?.expertId);
+        const client = await this.authService.getUserById(session?.clientId);
+
+        let meetingPayload = {
+          summary: `Meeting with ${expert?.firstName} ${expert?.lastName} & ${client?.firstName} ${client?.lastName}`,
+          description: `Meeting happening on ${session?.meetingDate}`,
+          location: 'Google Meet',
+          attendees: [
+            {
+              email: expert?.email,
+              displayName: `${expert?.firstName} ${expert?.lastName}`,
+              responseStatus: 'needsAction',
+            },
+            {
+              email: client?.email,
+              displayName: `${client?.firstName} ${client?.lastName}`,
+              responseStatus: 'needsAction',
+            },
+          ],
+          start: {
+            dateTime: `${moment(session?.meetingDate)?.format('YYYY-MM-DD')}T${
+              session?.slot?.from
+            }:00`,
+            timeZone: 'Africa/Douala',
+          },
+          end: {
+            dateTime: `${moment(session?.meetingDate)?.format('YYYY-MM-DD')}T${
+              session?.slot?.to
+            }:00`,
+            timeZone: 'Africa/Douala',
+          },
+          conferenceData: {
+            createRequest: {
+              conferenceSolutionKey: {
+                type: 'hangoutsMeet',
+              },
+              requestId: generateRandomString(),
+            },
+          },
+          params: {
+            sendNotifications: true,
+          },
+          reminders: {
+            useDefault: true,
+          },
+        };
+
+        const generateCalenderAppointment =
+          await this.googleService.createMeetingLink(meetingPayload);
+
         data = {
           ...data,
           stripePaymentStatus: StripePaymentStatus.paid,
           status: SessionStatus.booked,
           updatedDate: new Date(),
+          meetingUrl: generateCalenderAppointment?.hangoutLink,
         };
       }
       if (
