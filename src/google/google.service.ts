@@ -15,7 +15,11 @@ export class GoogleService {
     private googleTokenRepo: Repository<GoogleRefreshToken>,
   ) {}
   initGoogleApi(redirectUri?: string) {
-    console.log(process.env.GOOGLE_CLIENT_ID);
+    console.log(
+      process.env.GOOGLE_CLIENT_ID,
+      process.env.GOOGLE_CLIENT_SECRET,
+      'client ID',
+    );
 
     return new google.auth.OAuth2({
       clientId: process.env.GOOGLE_CLIENT_ID,
@@ -41,9 +45,13 @@ export class GoogleService {
   }
 
   async storeGoogleRefreshToken(code: string, user: JwtContent) {
+    console.log('alice');
+
     const {
       tokens: { refresh_token },
     } = await this.initGoogleApi().getToken(code);
+
+    console.log(refresh_token, 'yhhh');
 
     return await this.googleTokenRepo.save({
       userId: user.uid,

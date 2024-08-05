@@ -235,9 +235,6 @@ export class ExpertProfileService {
       );
     }
     for (let i = 0; i < body.slot.length; i++) {
-      console.table(body.slot[i]);
-      console.log('table');
-
       if (
         !body.slot[i].from ||
         !body.slot[i].to ||
