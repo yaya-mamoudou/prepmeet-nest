@@ -29,6 +29,7 @@ import axios from 'axios';
 import { JwtContent } from 'src/utils/types';
 import { ExpertProfile } from 'src/expert-profile/entities/expert-profile.entity';
 import { AppModule } from 'src/app.module';
+import { PaginateQuery, paginate } from 'nestjs-paginate';
 
 export interface JWTTokens {
   accessToken: string;
@@ -400,8 +401,12 @@ export class AuthService {
     return await this.userRepo.update(id, { password: hashText(password) });
   }
 
-  async getAllUserByRole(role: UserRole) {
-    return await this.userRepo.find({
+  async getAllUserByRole(role: UserRole, query: PaginateQuery) {
+    return paginate(query, this.userRepo, {
+      sortableColumns: ['id', 'updatedDate', 'createdDate'],
+      nullSort: 'last',
+      defaultSortBy: [['id', 'DESC']],
+      select: ['all'],
       where: {
         role: role,
       },

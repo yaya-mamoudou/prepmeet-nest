@@ -3,6 +3,7 @@ import { AuthService } from './auth/auth.service';
 import { ExpertProfileService } from './expert-profile/expert-profile.service';
 import { JwtContent } from './utils/types';
 import { UserRole } from './utils/enum';
+import { PaginateQuery } from 'nestjs-paginate';
 
 @Injectable()
 export class AppService {
@@ -22,7 +23,7 @@ export class AppService {
     return this.expertProfileService.getExpertProfileById(user.uid);
   }
 
-  async getAllFocusArea() {
-    return this.expertProfileService.getFocusArea();
+  async getAllFocusArea(query: PaginateQuery) {
+    return this.expertProfileService.getFocusArea(query);
   }
 }

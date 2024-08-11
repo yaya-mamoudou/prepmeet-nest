@@ -20,6 +20,7 @@ import { Availability } from 'src/session/entities/availability';
 import { DaysArray } from 'src/utils/types';
 import { AuthService } from 'src/auth/auth.service';
 import { UserRole } from 'src/utils/enum';
+import { PaginateQuery, paginate } from 'nestjs-paginate';
 
 @Injectable()
 export class ExpertProfileService {
@@ -63,8 +64,8 @@ export class ExpertProfileService {
     return { profileInfo, user, certificate, availability, education };
   }
 
-  async getAllExperts() {
-    return await this.authService.getAllUserByRole(UserRole.expert);
+  async getAllExperts(query: PaginateQuery) {
+    return await this.authService.getAllUserByRole(UserRole.expert, query);
   }
 
   async updateExpertProfile(id: number, profileInfo: UpdateExpertProfileDto) {
@@ -293,7 +294,12 @@ export class ExpertProfileService {
     });
   }
 
-  async getFocusArea() {
-    return this.focusArea.find();
+  async getFocusArea(query: PaginateQuery) {
+    return paginate(query, this.focusArea, {
+      sortableColumns: ['id', 'FocusArea'],
+      nullSort: 'last',
+      defaultSortBy: [['id', 'DESC']],
+      select: ['all'],
+    });
   }
 }

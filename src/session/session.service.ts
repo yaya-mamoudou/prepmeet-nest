@@ -19,6 +19,7 @@ import * as moment from 'moment';
 import { ExpertProfileService } from 'src/expert-profile/expert-profile.service';
 import { GoogleService } from 'src/google/google.service';
 import { generateRandomString } from 'src/utils/util';
+import { PaginateQuery, paginate } from 'nestjs-paginate';
 
 @Injectable()
 export class SessionService {
@@ -27,7 +28,6 @@ export class SessionService {
     private readonly expertProfileService: ExpertProfileService,
     @InjectRepository(Session)
     private sessionRepo: Repository<Session>,
-    private pusherService: PusherService,
     private stripeService: StripeService,
     private googleService: GoogleService,
   ) {}
@@ -101,16 +101,23 @@ export class SessionService {
     return response;
   }
 
-  async getAllSessions(user: JwtContent) {
-    return this.sessionRepo
+  async getAllSessions(user: JwtContent, query: PaginateQuery) {
+    const allSessions = await this.sessionRepo
       .createQueryBuilder('session')
       .where('(session.clientId = :userId OR session.expertId = :userId)', {
         userId: user.uid,
       })
       .leftJoinAndSelect('session.client', 'client')
-      .leftJoinAndSelect('session.expert', 'expert')
-      .addOrderBy('session.updatedDate', 'DESC')
-      .getMany();
+      .leftJoinAndSelect('session.expert', 'expert');
+
+    return await paginate<Session>(query, allSessions, {
+      sortableColumns: ['id', 'createdDate', 'updatedDate'],
+      defaultSortBy: [['id', 'DESC']],
+      filterableColumns: {
+        status: true,
+        stripePaymentStatus: true,
+      },
+    });
   }
 
   @Cron(CronExpression.EVERY_5_MINUTES)

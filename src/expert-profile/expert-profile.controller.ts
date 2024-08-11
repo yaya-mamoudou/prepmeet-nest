@@ -27,12 +27,20 @@ import {
   updateCertificationDto,
   updateExpertAvailabilityDto,
 } from './dto/update-profile.dto';
+import {
+  ApiOkPaginatedResponse,
+  ApiPaginationQuery,
+  Paginate,
+  PaginateQuery,
+} from 'nestjs-paginate';
+import { RegisterDto } from 'src/auth/dto/auth.dto';
+import { PAGINATION_PARAM } from 'src/utils/types';
 
 @Controller('expert')
 @ApiBearerAuth()
 @ApiTags('Expert')
 export class ExpertProfileController {
-  constructor(private readonly expertProfileService: ExpertProfileService) { }
+  constructor(private readonly expertProfileService: ExpertProfileService) {}
 
   @Get()
   @ApiOperation({ summary: 'Get currently signed in expert profile' })
@@ -42,13 +50,13 @@ export class ExpertProfileController {
     return this.expertProfileService.getExpertProfile(user.uid);
   }
 
-
-  @Get("/list")
+  @Get('/list')
+  @ApiOkPaginatedResponse(RegisterDto, PAGINATION_PARAM)
+  @ApiPaginationQuery(PAGINATION_PARAM)
   @ApiOperation({ summary: 'Get list of experts' })
-  // @UseGuards(AuthGuard('jwt'))
-  getAll(@Request() req: any) {
+  getAll(@Request() req: any, @Paginate() query: PaginateQuery) {
     const user = req.user;
-    return this.expertProfileService.getAllExperts();
+    return this.expertProfileService.getAllExperts(query);
   }
 
   @Get('/:expertId')

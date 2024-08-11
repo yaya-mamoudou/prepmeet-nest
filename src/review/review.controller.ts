@@ -13,6 +13,14 @@ import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { CreateReviewDto } from './dto/review.dto';
 import { LeaveReview } from 'src/auth/examples/review';
+import {
+  ApiOkPaginatedResponse,
+  ApiPaginationQuery,
+  Paginate,
+  PaginateQuery,
+} from 'nestjs-paginate';
+import { PAGINATION_PARAM } from 'src/utils/types';
+import { Review } from './entities/review.entity';
 
 @Controller('review')
 @ApiBearerAuth()
@@ -22,9 +30,14 @@ export class ReviewController {
 
   @Get('/expert/:expertId')
   @UseGuards(AuthGuard('jwt'))
+  @ApiOkPaginatedResponse(Review, PAGINATION_PARAM)
+  @ApiPaginationQuery(PAGINATION_PARAM)
   @ApiOperation({ summary: 'Get all reviews for an expert' })
-  getReviewsByExpertId(@Param('expertId') expertId: number) {
-    return this.reviewService.getAllExpertReviews(expertId);
+  getReviewsByExpertId(
+    @Param('expertId') expertId: number,
+    @Paginate() query: PaginateQuery,
+  ) {
+    return this.reviewService.getAllExpertReviews(expertId, query);
   }
 
   @Post('/leave-review')
@@ -45,7 +58,7 @@ export class ReviewController {
 
   @Delete('/:reviewId')
   @ApiOperation({ summary: 'Delete a specific review id' })
-  @UseGuards(AuthGuard('jwt'))
+  // @UseGuards(AuthGuard('jwt'))
   deleteEducationById(
     @Param('reviewId') reviewId: number,
     @Request() req: any,

@@ -18,6 +18,14 @@ import {
   CreateConversationExample,
   SendMessageExample,
 } from 'src/auth/examples/message';
+import {
+  ApiOkPaginatedResponse,
+  ApiPaginationQuery,
+  Paginate,
+  PaginateQuery,
+} from 'nestjs-paginate';
+import { Conversation } from './entity/conversation.entity';
+import { PAGINATION_PARAM } from 'src/utils/types';
 
 @Controller('messages')
 @ApiBearerAuth()
@@ -46,12 +54,14 @@ export class MessagesController {
 
   @Get('/conversations')
   @UseGuards(AuthGuard('jwt'))
+  @ApiOkPaginatedResponse(Conversation, PAGINATION_PARAM)
+  @ApiPaginationQuery(PAGINATION_PARAM)
   @ApiOperation({
     summary: 'Get all a users conversations',
   })
-  getAllConversations(@Request() req: any) {
+  getAllConversations(@Request() req: any, @Paginate() query: PaginateQuery) {
     const user = req.user;
-    return this.messagesService.getAllConversation(user);
+    return this.messagesService.getAllConversation(user, query);
   }
 
   @Post('/send-message')
@@ -78,11 +88,14 @@ export class MessagesController {
   @ApiOperation({
     summary: 'Get all a users messages',
   })
+  @ApiOkPaginatedResponse(Conversation, PAGINATION_PARAM)
+  @ApiPaginationQuery(PAGINATION_PARAM)
   getAllMessages(
     @Request() req: any,
     @Param('conversationId') conversationId: number,
+    @Paginate() query: PaginateQuery,
   ) {
     const user = req.user;
-    return this.messagesService.getAllMessages(user, conversationId);
+    return this.messagesService.getAllMessages(user, conversationId, query);
   }
 }

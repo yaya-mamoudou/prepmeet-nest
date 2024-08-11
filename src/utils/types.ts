@@ -25,3 +25,11 @@ export const DaysArray = [
   'saturday',
   'sunday',
 ];
+
+export const PAGINATION_PARAM = {
+  sortableColumns: ['id', 'updatedDate', 'createdDate'],
+};
+
+export const FOCUS_AREA_PAGINATION_PARAM = {
+  sortableColumns: ['id', 'FocusArea'],
+};

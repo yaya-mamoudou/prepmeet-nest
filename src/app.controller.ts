@@ -2,6 +2,14 @@ import { Controller, Get, Request, UseGuards } from '@nestjs/common';
 import { AppService } from './app.service';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import {
+  ApiOkPaginatedResponse,
+  ApiPaginationQuery,
+  Paginate,
+  PaginateQuery,
+} from 'nestjs-paginate';
+import { FocusArea } from './expert-profile/entities/focus-area.entity';
+import { FOCUS_AREA_PAGINATION_PARAM, PAGINATION_PARAM } from './utils/types';
 
 @Controller()
 @ApiBearerAuth()
@@ -27,8 +35,10 @@ export class AppController {
   @ApiOperation({
     summary: 'Get All focus areas',
   })
-  getAllFocusArea(@Request() req: any) {
+  @ApiOkPaginatedResponse(FocusArea, FOCUS_AREA_PAGINATION_PARAM)
+  @ApiPaginationQuery(FOCUS_AREA_PAGINATION_PARAM)
+  getAllFocusArea(@Request() req: any, @Paginate() query: PaginateQuery) {
     const user = req.user;
-    return this.appService.getAllFocusArea();
+    return this.appService.getAllFocusArea(query);
   }
 }

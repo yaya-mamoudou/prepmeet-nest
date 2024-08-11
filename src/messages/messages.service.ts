@@ -11,6 +11,7 @@ import { SendMessageDto } from './dto/message.dto';
 import { PusherService } from 'src/pusher/pusher.service';
 import { PusherChannels, PusherEvents } from 'src/constants';
 import { Message } from './entity/message.entity';
+import { PaginateQuery, paginate } from 'nestjs-paginate';
 
 @Injectable()
 export class MessagesService {
@@ -72,27 +73,34 @@ export class MessagesService {
     });
   }
 
-  async getAllConversation(user: JwtContent) {
+  async getAllConversation(user: JwtContent, query: PaginateQuery) {
     const conversationArray = [];
-    const conversations = await this.conversationRepo
+    const conversations = this.conversationRepo
       .createQueryBuilder('conversation')
       .where(
         '(conversation.initiatorWithUserId = :userId OR conversation.initiatorId = :userId)',
         { userId: user.uid },
       )
       .leftJoinAndSelect('conversation.initiator', 'initiator')
-      .leftJoinAndSelect('conversation.initiatorWithUser', 'initiatorWithUser')
-      .addOrderBy('conversation.updatedDate', 'DESC')
-      .getMany();
+      .leftJoinAndSelect('conversation.initiatorWithUser', 'initiatorWithUser');
 
-    for (let i = 0; i < conversations.length; i++) {
-      let message = await this.getLastMessage(conversations[i].id);
+    const result = await paginate<Conversation>(query, conversations, {
+      sortableColumns: ['id', 'createdDate', 'updatedDate'],
+      defaultSortBy: [['id', 'DESC']],
+    });
+
+    for (let i = 0; i < result.data.length; i++) {
+      let message = await this.getLastMessage(result.data[i].id);
       conversationArray.push({
-        ...conversations[i],
+        ...result.data[i],
         message,
       });
     }
-    return conversationArray;
+    return {
+      data: conversationArray,
+      links: result.links,
+      meta: result.meta,
+    };
   }
 
   async sendMessage(body: SendMessageDto, user: JwtContent) {
@@ -143,7 +151,7 @@ export class MessagesService {
     return message;
   }
 
-  async getAllMessages(user: JwtContent, id: number) {
+  async getAllMessages(user: JwtContent, id: number, query: PaginateQuery) {
     const conversation = await this.getConversation(id);
     const members = [
       conversation.initiatorWithUserId,
@@ -156,12 +164,13 @@ export class MessagesService {
       );
     }
 
-    return this.messageRepo.find({
+    return paginate(query, this.messageRepo, {
+      sortableColumns: ['id', 'createdDate', 'updatedDate'],
+      nullSort: 'last',
+      defaultSortBy: [['id', 'ASC']],
+      select: ['all'],
       where: {
         conversationId: id,
-      },
-      order: {
-        updatedDate: 'ASC',
       },
     });
   }

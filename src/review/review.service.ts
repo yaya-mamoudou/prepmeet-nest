@@ -6,6 +6,7 @@ import { Review } from './entities/review.entity';
 import { JwtContent } from 'src/utils/types';
 import { CreateReviewDto } from './dto/review.dto';
 import { UserRole } from 'src/utils/enum';
+import { PaginateQuery, paginate } from 'nestjs-paginate';
 
 @Injectable()
 export class ReviewService {
@@ -74,19 +75,22 @@ export class ReviewService {
     });
   }
 
-  async getAllExpertReviews(expertId: number) {
-    const reviews = await this.reviewRepo.find({
+  async getAllExpertReviews(expertId: number, query: PaginateQuery) {
+    const result = await paginate(query, this.reviewRepo, {
+      sortableColumns: ['id', 'createdDate', 'updatedDate'],
+      defaultSortBy: [['id', 'DESC']],
       where: {
         expertId: expertId,
       },
     });
+
     let total = 0;
-    for (let i = 0; i < reviews.length; i++) {
-      total += reviews[i]?.rating;
+    for (let i = 0; i < result.data.length; i++) {
+      total += result.data[i]?.rating;
     }
     return {
-      overallRatings: (total / reviews?.length).toFixed(2),
-      reviews,
+      overallRatings: (total / result.data?.length).toFixed(2),
+      ...result,
     };
   }
 }

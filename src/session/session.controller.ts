@@ -21,6 +21,13 @@ import { AuthGuard } from '@nestjs/passport';
 import { CreateSessionDto } from './dto/session.dto';
 import { CreateSessionExample } from 'src/auth/examples/session';
 import { Availability } from './entities/availability';
+import {
+  ApiOkPaginatedResponse,
+  ApiPaginationQuery,
+  Paginate,
+  PaginateQuery,
+} from 'nestjs-paginate';
+import { Session } from './entities/session.entity';
 
 @Controller('session')
 @ApiBearerAuth()
@@ -51,8 +58,22 @@ export class SessionController {
   @ApiOperation({
     summary: 'Get all users sessions',
   })
-  getAllSessions(@Request() req: any) {
+  @ApiOkPaginatedResponse(Session, {
+    filterableColumns: {
+      status: true,
+      stripePaymentStatus: true,
+    },
+    sortableColumns: ['id', 'createdDate', 'updatedDate'],
+  })
+  @ApiPaginationQuery({
+    filterableColumns: {
+      status: true,
+      stripePaymentStatus: true,
+    },
+    sortableColumns: ['id', 'createdDate', 'updatedDate'],
+  })
+  getAllSessions(@Request() req: any, @Paginate() query: PaginateQuery) {
     const user = req.user;
-    return this.sessionService.getAllSessions(user);
+    return this.sessionService.getAllSessions(user, query);
   }
 }
