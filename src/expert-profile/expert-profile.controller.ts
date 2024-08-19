@@ -34,7 +34,7 @@ import {
   PaginateQuery,
 } from 'nestjs-paginate';
 import { RegisterDto } from 'src/auth/dto/auth.dto';
-import { PAGINATION_PARAM } from 'src/utils/types';
+import { EXPERT_PAGINATION_PARAM, PAGINATION_PARAM } from 'src/utils/types';
 
 @Controller('expert')
 @ApiBearerAuth()
@@ -51,17 +51,15 @@ export class ExpertProfileController {
   }
 
   @Get('/list')
-  @ApiOkPaginatedResponse(RegisterDto, PAGINATION_PARAM)
-  @ApiPaginationQuery(PAGINATION_PARAM)
+  @ApiOkPaginatedResponse(RegisterDto, EXPERT_PAGINATION_PARAM)
+  @ApiPaginationQuery(EXPERT_PAGINATION_PARAM)
   @ApiOperation({ summary: 'Get list of experts' })
-  getAll(@Request() req: any, @Paginate() query: PaginateQuery) {
-    const user = req.user;
+  getAll(@Paginate() query: PaginateQuery) {
     return this.expertProfileService.getAllExperts(query);
   }
 
   @Get('/:expertId')
   @ApiOperation({ summary: 'Get expert profile by ID' })
-  // @UseGuards(AuthGuard('jwt'))
   getExpertProfileById(@Param('expertId') expertId: number) {
     return this.expertProfileService.getExpertProfileById(expertId);
   }

@@ -3,17 +3,14 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ExpertProfile } from './entities/expert-profile.entity';
 import {
-  AddCertificationDto,
   AddEducationExperienceDto,
   UpdateExpertProfileDto,
-  updateCertificationDto,
   updateEducationExperienceDto,
   updateExpertAvailabilityDto,
 } from './dto/update-profile.dto';
 import { FocusArea } from './entities/focus-area.entity';
 import { EducationalExperience } from './entities/educational-experience.entity';
 import { Degrees } from './entities/degrees.entity';
-import { Certificate } from 'crypto';
 import { Certification } from './entities/certification.entity';
 import { StripeService } from 'src/stripe/stripe.service';
 import { Availability } from 'src/session/entities/availability';
@@ -65,7 +62,18 @@ export class ExpertProfileService {
   }
 
   async getAllExperts(query: PaginateQuery) {
-    return await this.authService.getAllUserByRole(UserRole.expert, query);
+    return paginate(query, this.expertProfileRepo, {
+      sortableColumns: ['id', 'updatedDate', 'createdDate'],
+      relations: {
+        user: true,
+        focusArea: true,
+      },
+      searchableColumns: [
+        'user.firstName',
+        'user.lastName',
+        'focusArea.FocusArea',
+      ],
+    });
   }
 
   async updateExpertProfile(id: number, profileInfo: UpdateExpertProfileDto) {

@@ -82,20 +82,22 @@ export class SessionService {
       if (!body.slot[i].from || !body.slot[i].to || !body.slot[i].meetingDate) {
         continue;
       }
-      await this.sessionRepo.save({
-        ...body,
-        price: stripeSession.amount_total / 100,
-        clientId: user.uid,
-        paymentUrl: stripeSession.url,
-        createdDate: new Date(),
-        updatedDate: new Date(),
-        stripeSessionId: stripeSession.id,
-        meetingDate: body.slot[i].meetingDate,
-        slot: {
-          from: body.slot[i].from,
-          to: body.slot[i].to,
-        },
-      });
+      if (response?.length === 0) {
+        return await this.sessionRepo.save({
+          ...body,
+          price: stripeSession.amount_total / 100,
+          clientId: user.uid,
+          paymentUrl: stripeSession.url,
+          createdDate: new Date(),
+          updatedDate: new Date(),
+          stripeSessionId: stripeSession.id,
+          meetingDate: body.slot[i].meetingDate,
+          slot: {
+            from: body.slot[i].from,
+            to: body.slot[i].to,
+          },
+        });
+      }
     }
 
     return response;
@@ -126,125 +128,132 @@ export class SessionService {
 
     const expirationTimeInMinutes = 30;
 
-    const allPendingSessions = await this.sessionRepo.find({
-      where: {
-        stripePaymentStatus: SessionStatus.pending,
-      },
-    });
+    try {
+      const allPendingSessions = await this.sessionRepo.find({
+        where: {
+          stripePaymentStatus: SessionStatus.pending,
+        },
+      });
 
-    if (!allPendingSessions) {
-      return;
-    }
-
-    for (let i = 0; i < allPendingSessions.length; i++) {
-      const session = allPendingSessions[i];
-      let data = {
-        ...session,
-      };
-
-      const timeDifference = moment(new Date()).diff(session.createdDate, 'm');
-
-      if (
-        timeDifference > expirationTimeInMinutes &&
-        session.stripePaymentStatus !== StripePaymentStatus.expired
-      ) {
-        await this.stripeService.expireSession(session.stripeSessionId);
-        data = {
-          ...data,
-          stripePaymentStatus: StripePaymentStatus.expired,
-          status: SessionStatus.canceled,
-          updatedDate: new Date(),
-        };
+      if (!allPendingSessions) {
+        return;
       }
 
-      let paymentResponse = await this.stripeService.getSession(
-        session.stripeSessionId,
-      );
+      for (let i = 0; i < allPendingSessions.length; i++) {
+        const session = allPendingSessions[i];
+        let data = {
+          ...session,
+        };
 
-      if (
-        paymentResponse.status === StripePaymentStatus.complete &&
-        paymentResponse.payment_status === 'paid'
-      ) {
-        const expert = await this.authService.getUserById(session?.expertId);
-        const client = await this.authService.getUserById(session?.clientId);
+        const timeDifference = moment(new Date()).diff(
+          session.createdDate,
+          'm',
+        );
 
-        let meetingPayload = {
-          summary: `Meeting with ${expert?.firstName} ${expert?.lastName} & ${client?.firstName} ${client?.lastName}`,
-          description: `Meeting happening on ${session?.meetingDate}`,
-          location: 'Google Meet',
-          attendees: [
-            {
-              email: expert?.email,
-              displayName: `${expert?.firstName} ${expert?.lastName}`,
-              responseStatus: 'needsAction',
-            },
-            {
-              email: client?.email,
-              displayName: `${client?.firstName} ${client?.lastName}`,
-              responseStatus: 'needsAction',
-            },
-          ],
-          start: {
-            dateTime: `${moment(session?.meetingDate)?.format('YYYY-MM-DD')}T${
-              session?.slot?.from
-            }:00`,
-            timeZone: 'Africa/Douala',
-          },
-          end: {
-            dateTime: `${moment(session?.meetingDate)?.format('YYYY-MM-DD')}T${
-              session?.slot?.to
-            }:00`,
-            timeZone: 'Africa/Douala',
-          },
-          conferenceData: {
-            createRequest: {
-              conferenceSolutionKey: {
-                type: 'hangoutsMeet',
+        if (
+          timeDifference > expirationTimeInMinutes &&
+          session.stripePaymentStatus !== StripePaymentStatus.expired
+        ) {
+          await this.stripeService.expireSession(session.stripeSessionId);
+          data = {
+            ...data,
+            stripePaymentStatus: StripePaymentStatus.expired,
+            status: SessionStatus.canceled,
+            updatedDate: new Date(),
+          };
+        }
+
+        let paymentResponse = await this.stripeService.getSession(
+          session.stripeSessionId,
+        );
+
+        if (
+          paymentResponse.status === StripePaymentStatus.complete &&
+          paymentResponse.payment_status === 'paid'
+        ) {
+          const expert = await this.authService.getUserById(session?.expertId);
+          const client = await this.authService.getUserById(session?.clientId);
+
+          let meetingPayload = {
+            summary: `Meeting with ${expert?.firstName} ${expert?.lastName} & ${client?.firstName} ${client?.lastName}`,
+            description: `Meeting happening on ${session?.meetingDate}`,
+            location: 'Google Meet',
+            attendees: [
+              {
+                email: expert?.email,
+                displayName: `${expert?.firstName} ${expert?.lastName}`,
+                responseStatus: 'needsAction',
               },
-              requestId: generateRandomString(),
+              {
+                email: client?.email,
+                displayName: `${client?.firstName} ${client?.lastName}`,
+                responseStatus: 'needsAction',
+              },
+            ],
+            start: {
+              dateTime: `${moment(session?.meetingDate)?.format(
+                'YYYY-MM-DD',
+              )}T${session?.slot?.from}:00`,
+              timeZone: 'Africa/Douala',
             },
-          },
-          params: {
-            sendNotifications: true,
-          },
-          reminders: {
-            useDefault: true,
-          },
-        };
+            end: {
+              dateTime: `${moment(session?.meetingDate)?.format(
+                'YYYY-MM-DD',
+              )}T${session?.slot?.to}:00`,
+              timeZone: 'Africa/Douala',
+            },
+            conferenceData: {
+              createRequest: {
+                conferenceSolutionKey: {
+                  type: 'hangoutsMeet',
+                },
+                requestId: generateRandomString(),
+              },
+            },
+            params: {
+              sendNotifications: true,
+            },
+            reminders: {
+              useDefault: true,
+            },
+          };
 
-        const generateCalenderAppointment =
-          await this.googleService.createMeetingLink(meetingPayload);
+          const generateCalenderAppointment =
+            await this.googleService.createMeetingLink(meetingPayload);
 
-        data = {
-          ...data,
-          stripePaymentStatus: StripePaymentStatus.paid,
-          status: SessionStatus.booked,
-          updatedDate: new Date(),
-          meetingUrl: generateCalenderAppointment?.hangoutLink,
-        };
+          data = {
+            ...data,
+            stripePaymentStatus: StripePaymentStatus.paid,
+            status: SessionStatus.booked,
+            updatedDate: new Date(),
+            meetingUrl: generateCalenderAppointment?.hangoutLink,
+          };
+        }
+        if (
+          paymentResponse.status === StripePaymentStatus.complete &&
+          paymentResponse.payment_status === 'unpaid'
+        ) {
+          data = {
+            ...data,
+            stripePaymentStatus: StripePaymentStatus.unpaid,
+            status: SessionStatus.canceled,
+            updatedDate: new Date(),
+          };
+        }
+
+        if (paymentResponse.status == 'expired') {
+          data = {
+            ...data,
+            stripePaymentStatus: StripePaymentStatus.expired,
+            status: SessionStatus.canceled,
+            updatedDate: new Date(),
+          };
+        }
+
+        await this.sessionRepo.update(session.id, data);
       }
-      if (
-        paymentResponse.status === StripePaymentStatus.complete &&
-        paymentResponse.payment_status === 'unpaid'
-      ) {
-        data = {
-          ...data,
-          stripePaymentStatus: StripePaymentStatus.unpaid,
-          status: SessionStatus.canceled,
-          updatedDate: new Date(),
-        };
-      }
-
-      if (paymentResponse.status == 'expired') {
-        data = {
-          ...data,
-          stripePaymentStatus: StripePaymentStatus.expired,
-          status: SessionStatus.canceled,
-          updatedDate: new Date(),
-        };
-      }
-
-      await this.sessionRepo.update(session.id, data);
+    } catch (e) {
+      console.log(e, 'cron failed to run');
     }
   }
 

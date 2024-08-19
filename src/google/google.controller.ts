@@ -35,4 +35,9 @@ export class GoogleController {
     const user = req.user;
     return this.googleService.createMeetingLink(user);
   }
+
+  @Get('end-meeting')
+  endMeeting() {
+    return this.googleService.endActiveMeeting();
+  }
 }

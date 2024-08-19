@@ -33,3 +33,8 @@ export const PAGINATION_PARAM = {
 export const FOCUS_AREA_PAGINATION_PARAM = {
   sortableColumns: ['id', 'FocusArea'],
 };
+
+export const EXPERT_PAGINATION_PARAM = {
+  sortableColumns: ['id', 'updatedDate', 'createdDate'],
+  searchableColumns: ['firstName', 'lastName'],
+};

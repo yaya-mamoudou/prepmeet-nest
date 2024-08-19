@@ -1,10 +1,4 @@
-import {
-  HttpException,
-  HttpStatus,
-  Inject,
-  Injectable,
-  forwardRef,
-} from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { User } from './entities/auth.entity';
 import {
   LoginDto,
@@ -15,11 +9,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { generateOtp, hashText } from 'src/utils/util';
-import {
-  SocialAuthenticationParam,
-  UserRole,
-  VerificationCodeType,
-} from 'src/utils/enum';
+import { UserRole, VerificationCodeType } from 'src/utils/enum';
 import { JwtService } from '@nestjs/jwt';
 import { MailerService } from '@nestjs-modules/mailer';
 import { VerificationCode } from './entities/verification-code';
@@ -28,8 +18,6 @@ import { VerificationEmail } from './entities/verification-email';
 import axios from 'axios';
 import { JwtContent } from 'src/utils/types';
 import { ExpertProfile } from 'src/expert-profile/entities/expert-profile.entity';
-import { AppModule } from 'src/app.module';
-import { PaginateQuery, paginate } from 'nestjs-paginate';
 
 export interface JWTTokens {
   accessToken: string;
@@ -128,7 +116,7 @@ export class AuthService {
       );
     }
 
-    const newUser = await this.userRepo.create({
+    let newUser = await this.userRepo.create({
       ...body,
       createdDate: new Date(),
       updatedDate: new Date(),
@@ -139,6 +127,14 @@ export class AuthService {
       emailVerified: user.verified_email,
       role: body.role,
     });
+
+    if (body.role === UserRole.expert) {
+      let expert = await this.expertProfileRepo.save({
+        userId: newUser.id,
+      });
+      newUser = { ...newUser, ...expert };
+    }
+
     const tokens = await this.getToken(newUser);
     await this.userRepo.save(newUser);
     return { ...tokens, user: newUser };
@@ -192,7 +188,7 @@ export class AuthService {
           role: user.role,
         },
         {
-          expiresIn: 60 * 60 * 24 * 7,
+          expiresIn: 60 * 60 * 24 * 30,
           secret: 'at-secret',
         },
       ),
@@ -203,7 +199,7 @@ export class AuthService {
           role: user.role,
         },
         {
-          expiresIn: 60 * 60 * 24 * 7,
+          expiresIn: 60 * 60 * 24 * 30,
           secret: 'rt-secret',
         },
       ),
@@ -285,10 +281,7 @@ export class AuthService {
           text: `Your verification code is ${otp}`,
         });
       } catch (error) {
-        throw new HttpException(
-          `Error associated with mailing server`,
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        );
+        throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
       }
       return `code sent to ${email}`;
     } catch (error) {
@@ -350,6 +343,13 @@ export class AuthService {
         );
       }
 
+      if (user.emailVerified) {
+        throw new HttpException(
+          `Email already verified`,
+          HttpStatus.UNAUTHORIZED,
+        );
+      }
+
       const url = `http://localhost:4000/auth/verify-email/${user.email}`;
 
       await this.verificationEmailRepo.save({
@@ -360,23 +360,17 @@ export class AuthService {
       });
       try {
         await this.mailService.sendMail({
-          from: 'alicendeh16@gmail.com',
-          to: 'alicendeh@icloud.com',
+          from: 'notification@prepmeets.com',
+          to: user.email,
           subject: `Verify email`,
           html: `<p>Click on the link below to verify your email. If you did not request for this, please ignore this message <a href=${url}>Click here to verify !</a></p>`,
         });
       } catch (error) {
-        throw new HttpException(
-          `Error associated with mailing server`,
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        );
+        throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
       }
       return `Email sent to ${user.email}`;
     } catch (error) {
-      throw new HttpException(
-        `Internal server`,
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -387,11 +381,15 @@ export class AuthService {
 
     if (emailEntry.verified) {
       throw new HttpException(
-        `Verification code already used`,
+        `Account already verified or Verification code already used`,
         HttpStatus.BAD_REQUEST,
       );
     }
+    const user = await this.getUserByEmail({ email });
 
+    await this.userRepo.update(user.id, {
+      emailVerified: true,
+    });
     return await this.verificationEmailRepo.update(emailEntry.id, {
       verified: true,
     });
@@ -401,12 +399,8 @@ export class AuthService {
     return await this.userRepo.update(id, { password: hashText(password) });
   }
 
-  async getAllUserByRole(role: UserRole, query: PaginateQuery) {
-    return paginate(query, this.userRepo, {
-      sortableColumns: ['id', 'updatedDate', 'createdDate'],
-      nullSort: 'last',
-      defaultSortBy: [['id', 'DESC']],
-      select: ['all'],
+  async getAllUserByRole(role: UserRole) {
+    return await this.userRepo.find({
       where: {
         role: role,
       },
