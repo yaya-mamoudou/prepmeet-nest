@@ -18,6 +18,7 @@ import { VerificationEmail } from './entities/verification-email';
 import axios from 'axios';
 import { JwtContent } from 'src/utils/types';
 import { ExpertProfile } from 'src/expert-profile/entities/expert-profile.entity';
+import { UpdateProfileDto } from 'src/expert-profile/dto/update-profile.dto';
 
 export interface JWTTokens {
   accessToken: string;
@@ -257,6 +258,7 @@ export class AuthService {
       const otp = generateOtp();
 
       const codeEntry = await this.getOtpCodeEntry(email);
+
       if (!codeEntry) {
         data = await this.verificationCodeRepo.save({
           code: otp,
@@ -275,8 +277,8 @@ export class AuthService {
 
       try {
         await this.mailService.sendMail({
-          from: 'alicendeh16@gmail.com',
-          to: 'alicendeh@icloud.com',
+          from: 'notification@prepmeets.com',
+          to: email,
           subject: `Password reset`,
           text: `Your verification code is ${otp}`,
         });
@@ -405,5 +407,30 @@ export class AuthService {
         role: role,
       },
     });
+  }
+
+  async updateProfile(id: number, profileInfo: UpdateProfileDto) {
+    let userInfo = await this.userRepo.findOne({
+      where: {
+        id: id,
+      },
+    });
+
+    if (!userInfo) {
+      throw new HttpException(`User not found`, HttpStatus.NOT_FOUND);
+    }
+
+    const basicProfileInfo = {
+      firstName: profileInfo?.firstName,
+      lastName: profileInfo?.lastName,
+      country: profileInfo?.country,
+      location: profileInfo?.location,
+      gender: profileInfo?.gender,
+      profilePhoto: profileInfo?.profilePhoto,
+      dateOfBirth: profileInfo?.dateOfBirth,
+      phoneNumber: profileInfo?.phoneNumber,
+    };
+
+    return await this.userRepo.update(userInfo.id, basicProfileInfo);
   }
 }

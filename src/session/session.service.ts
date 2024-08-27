@@ -124,8 +124,6 @@ export class SessionService {
 
   @Cron(CronExpression.EVERY_5_MINUTES)
   async checkPaymentStatus() {
-    console.log('runing cron');
-
     const expirationTimeInMinutes = 30;
 
     try {

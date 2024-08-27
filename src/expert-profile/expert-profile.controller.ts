@@ -23,7 +23,7 @@ import {
 import {
   AddCertificationDto,
   AddEducationExperienceDto,
-  UpdateExpertProfileDto,
+  UpdateProfileDto,
   updateCertificationDto,
   updateExpertAvailabilityDto,
 } from './dto/update-profile.dto';
@@ -34,7 +34,7 @@ import {
   PaginateQuery,
 } from 'nestjs-paginate';
 import { RegisterDto } from 'src/auth/dto/auth.dto';
-import { EXPERT_PAGINATION_PARAM, PAGINATION_PARAM } from 'src/utils/types';
+import { EXPERT_PAGINATION_PARAM } from 'src/utils/types';
 
 @Controller('expert')
 @ApiBearerAuth()
@@ -67,10 +67,10 @@ export class ExpertProfileController {
   @Patch('')
   @ApiOperation({ summary: 'Update current expert profile' })
   @UseGuards(AuthGuard('jwt'))
-  @UseGuards(AuthGuard('expert-role'))
+  // @UseGuards(AuthGuard('expert-role'))
   @UsePipes(ValidationPipe)
   @ApiBody({
-    type: UpdateExpertProfileDto,
+    type: UpdateProfileDto,
     examples: {
       ExpertProfileUpdateExample: {
         value: ExpertProfileUpdateExample,
@@ -79,7 +79,7 @@ export class ExpertProfileController {
   })
   updateExpertProfile(
     @Request() req: any,
-    @Body() profileInfo: UpdateExpertProfileDto,
+    @Body() profileInfo: UpdateProfileDto,
   ) {
     const user = req.user;
     return this.expertProfileService.updateExpertProfile(user.uid, profileInfo);

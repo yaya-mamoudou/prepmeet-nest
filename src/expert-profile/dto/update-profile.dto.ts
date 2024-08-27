@@ -1,16 +1,25 @@
-import { IsEnum, IsNotEmpty } from 'class-validator';
-import { VisibilityLevel } from 'src/utils/enum';
+import { IsEmpty, IsEnum, IsNotEmpty, IsOptional } from 'class-validator';
+import { Gender, VisibilityLevel } from 'src/utils/enum';
 import { Slots } from 'src/utils/types';
 
-export class UpdateExpertProfileDto {
+export class UpdateProfileDto {
   about: string;
   videoUrl: string;
+  @IsOptional()
   @IsEnum(VisibilityLevel)
   visibilityLevel: VisibilityLevel;
   focusAreaId: number;
   starterPrice: number;
   recommendedPrice: number;
   bestPrice: number;
+  firstName: string;
+  lastName: string;
+  country: string;
+  location: string;
+  gender: Gender;
+  profilePhoto: string;
+  dateOfBirth: Date;
+  phoneNumber: string;
 }
 
 export class updateExpertAvailabilityDto {

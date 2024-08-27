@@ -97,12 +97,9 @@ export class GoogleService {
       };
 
       const response = await axios.request(config);
-      console.log(response.data, 'yooo');
 
       return response?.data;
     } catch (e) {
-      console.log(e?.response?.data?.error?.errors, 'in failed');
-
       throw new InternalServerErrorException(e);
     }
   }
@@ -138,10 +135,8 @@ export class GoogleService {
         // }),
       };
       const response = await axios.request(config);
-      console.log(response.data, 'response here');
       return response.data;
     } catch (e) {
-      console.log(e?.response, 'failed to end conference');
       // return e?.response;
       // throw new InternalServerErrorException(e);
     }

@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import { ExpertProfile } from './entities/expert-profile.entity';
 import {
   AddEducationExperienceDto,
-  UpdateExpertProfileDto,
+  UpdateProfileDto,
   updateEducationExperienceDto,
   updateExpertAvailabilityDto,
 } from './dto/update-profile.dto';
@@ -76,58 +76,96 @@ export class ExpertProfileService {
     });
   }
 
-  async updateExpertProfile(id: number, profileInfo: UpdateExpertProfileDto) {
+  async updateExpertProfile(id: number, profileInfo: UpdateProfileDto) {
     let userInfo = await this.expertProfileRepo.findOne({
       where: {
         userId: id,
       },
     });
+    const basicUser = await this.authService.getUserById(id);
 
-    if (profileInfo.focusAreaId) {
-      const getFocusArea = await this.focusArea.findOneBy({
-        id: profileInfo.focusAreaId,
-      });
-      if (!getFocusArea) {
-        throw new HttpException(`Focus Area not found`, HttpStatus.NOT_FOUND);
-      }
+    if (
+      profileInfo.hasOwnProperty('firstName') ||
+      profileInfo.hasOwnProperty('lastName') ||
+      profileInfo.hasOwnProperty('country') ||
+      profileInfo.hasOwnProperty('location') ||
+      profileInfo.hasOwnProperty('gender') ||
+      profileInfo.hasOwnProperty('dateOfBirth') ||
+      profileInfo.hasOwnProperty('phoneNumber')
+    ) {
+      await this.authService.updateProfile(id, profileInfo);
     }
 
-    if (!userInfo) {
-      let starterPriceUrl;
-      if (profileInfo.starterPrice) {
-        starterPriceUrl = await this.stripeService.createPrice(
-          'Payment plan',
-          profileInfo.starterPrice * 100,
-        );
+    if (
+      basicUser?.role === UserRole.expert &&
+      (profileInfo.hasOwnProperty('about') ||
+        profileInfo.hasOwnProperty('visibilityLevel') ||
+        profileInfo.hasOwnProperty('starterPrice') ||
+        profileInfo.hasOwnProperty('recommendedPrice') ||
+        profileInfo.hasOwnProperty('bestPrice') ||
+        profileInfo.hasOwnProperty('videoUrl') ||
+        profileInfo.hasOwnProperty('focusAreaId'))
+    ) {
+      const expertProfileInfo = {
+        about: profileInfo?.about,
+        videoUrl: profileInfo?.videoUrl,
+        visibilityLevel: profileInfo?.visibilityLevel,
+        focusAreaId: profileInfo?.focusAreaId,
+        starterPrice: profileInfo?.starterPrice,
+        recommendedPrice: profileInfo?.recommendedPrice,
+        bestPrice: profileInfo?.bestPrice,
+      };
+
+      if (expertProfileInfo.focusAreaId) {
+        const getFocusArea = await this.focusArea.findOneBy({
+          id: expertProfileInfo.focusAreaId,
+        });
+        if (!getFocusArea) {
+          throw new HttpException(`Focus Area not found`, HttpStatus.NOT_FOUND);
+        }
       }
 
-      let bestPriceUrl;
-      if (profileInfo.bestPrice) {
-        bestPriceUrl = await this.stripeService.createPrice(
-          'Payment plan',
-          profileInfo.bestPrice * 100,
-        );
+      if (!userInfo) {
+        let starterPriceUrl;
+        if (expertProfileInfo.starterPrice) {
+          starterPriceUrl = await this.stripeService.createPrice(
+            'Payment plan',
+            expertProfileInfo.starterPrice * 100,
+          );
+        }
+
+        let bestPriceUrl;
+        if (expertProfileInfo.bestPrice) {
+          bestPriceUrl = await this.stripeService.createPrice(
+            'Payment plan',
+            expertProfileInfo.bestPrice * 100,
+          );
+        }
+
+        let recommendedPriceUrl;
+        if (expertProfileInfo.recommendedPrice) {
+          recommendedPriceUrl = await this.stripeService.createPrice(
+            'Payment plan',
+            expertProfileInfo.recommendedPrice * 100,
+          );
+        }
+        return await this.expertProfileRepo.save({
+          ...expertProfileInfo,
+          userId: id,
+          starterPriceUrl: starterPriceUrl && starterPriceUrl,
+          bestPriceUrl: bestPriceUrl && bestPriceUrl,
+          recommendedPriceUrl: recommendedPriceUrl && recommendedPriceUrl,
+          createdDate: new Date(),
+          updatedDate: new Date(),
+        });
       }
 
-      let recommendedPriceUrl;
-      if (profileInfo.recommendedPrice) {
-        recommendedPriceUrl = await this.stripeService.createPrice(
-          'Payment plan',
-          profileInfo.recommendedPrice * 100,
-        );
-      }
-      return await this.expertProfileRepo.save({
-        ...profileInfo,
-        userId: id,
-        starterPriceUrl: starterPriceUrl && starterPriceUrl,
-        bestPriceUrl: bestPriceUrl && bestPriceUrl,
-        recommendedPriceUrl: recommendedPriceUrl && recommendedPriceUrl,
-        createdDate: new Date(),
-        updatedDate: new Date(),
-      });
+      return await this.expertProfileRepo.update(
+        userInfo.id,
+        expertProfileInfo,
+      );
     }
-
-    return await this.expertProfileRepo.update(userInfo.id, profileInfo);
+    return `Done`;
   }
 
   async addCertification(id: number, certifications: any[]) {

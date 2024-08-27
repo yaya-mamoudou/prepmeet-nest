@@ -8,6 +8,13 @@ export const ExpertProfileUpdateExample = {
   bestPrice: 15,
   videoUrl: 'http://video.com',
   focusAreaId: 1,
+  firstName: 'Jone',
+  lastName: 'Doe',
+  country: 'Cameroon',
+  location: 'Buea',
+  gender: 'male | female',
+  dateOfBirth: '2024-07-22 13:37:44',
+  phoneNumber: '699803277',
 };
 
 export const ExpertAvailabilityExample = [
