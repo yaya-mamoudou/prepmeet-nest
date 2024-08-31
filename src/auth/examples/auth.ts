@@ -40,9 +40,9 @@ export const LoginExample = {
 
 export const PasswordResetExample = {
   code: 123456,
-  password: 'Jone123#',
 };
 
 export const AuthPasswordResetExample = {
-  password: 'Jone123#',
+  email: 'jone@gmail.con',
+  newPassword: 'Jone123#',
 };

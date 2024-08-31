@@ -15,6 +15,7 @@ export const ExpertProfileUpdateExample = {
   gender: 'male | female',
   dateOfBirth: '2024-07-22 13:37:44',
   phoneNumber: '699803277',
+  doesUserHasCloudOrDevopsCertification: true,
 };
 
 export const ExpertAvailabilityExample = [

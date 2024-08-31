@@ -4,6 +4,7 @@ import {
   Column,
   Entity,
   JoinColumn,
+  ManyToOne,
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -25,7 +26,7 @@ export class ExpertProfile {
   @Column({ nullable: true })
   focusAreaId: number;
 
-  @OneToOne(() => FocusArea, (focusArea) => focusArea.profile)
+  @ManyToOne(() => FocusArea, (focusArea) => focusArea.profile)
   @JoinColumn({ name: 'focusAreaId' })
   focusArea: FocusArea;
 

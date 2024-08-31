@@ -14,6 +14,7 @@ import {
 import { AuthService } from './auth.service';
 import {
   AuthResetPasswordDto,
+  ChangePasswordDto,
   LoginDto,
   RegisterDto,
   ResetPasswordDto,
@@ -137,11 +138,22 @@ export class AuthController {
     @Param() { email }: { email: string },
     @Body() body: ResetPasswordDto,
   ) {
-    return this.authService.verifyForgetPasswordOtp(
-      email,
-      body.code,
-      body.newPassword,
-    );
+    return this.authService.verifyForgetPasswordOtp(email, body.code);
+  }
+
+  @Post('/reset-password')
+  @UsePipes(ValidationPipe)
+  @ApiOperation({ summary: 'Change password after email verification' })
+  @ApiBody({
+    type: AuthResetPasswordDto,
+    examples: {
+      login: {
+        value: AuthPasswordResetExample,
+      },
+    },
+  })
+  resetPassword(@Request() req: any, @Body() body: AuthResetPasswordDto) {
+    return this.authService.resetPassword(body.email, body.newPassword);
   }
 
   @Get('/request-email-verification/:email')
@@ -157,20 +169,26 @@ export class AuthController {
     return this.authService.emailVerification(data.user);
   }
 
-  @Post('/reset-password')
+  @Post('/change-password')
   @UseGuards(AuthGuard('jwt'))
   @UsePipes(ValidationPipe)
-  @ApiOperation({ summary: 'Allow logged in user change their password' })
+  @ApiOperation({
+    summary: 'Allow currently logged in user change their password',
+  })
   @ApiBody({
-    type: ResetPasswordDto,
+    type: ChangePasswordDto,
     examples: {
       login: {
         value: AuthPasswordResetExample,
       },
     },
   })
-  resetPassword(@Request() req: any, @Body() body: AuthResetPasswordDto) {
+  changePassword(@Request() req: any, @Body() body: ChangePasswordDto) {
     const user = req.user;
-    return this.authService.resetPassword(user.uid, body.newPassword);
+    return this.authService.changePassword(
+      user.uid,
+      body.newPassword,
+      body.oldPassword,
+    );
   }
 }
