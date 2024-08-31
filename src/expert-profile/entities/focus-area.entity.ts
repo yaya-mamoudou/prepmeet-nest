@@ -1,4 +1,10 @@
-import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  OneToMany,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { ExpertProfile } from './expert-profile.entity';
 
 @Entity('focus-area')
@@ -9,6 +15,6 @@ export class FocusArea {
   @Column()
   FocusArea: string;
 
-  @OneToOne(() => ExpertProfile, (expert) => expert.focusAreaId)
+  @OneToMany(() => ExpertProfile, (expert) => expert.focusAreaId)
   profile: ExpertProfile;
 }

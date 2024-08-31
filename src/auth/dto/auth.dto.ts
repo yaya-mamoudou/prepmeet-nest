@@ -60,10 +60,6 @@ export class SocialLoginDto {
 
 export class ResetPasswordDto {
   @IsNotEmpty()
-  @Length(6, 30)
-  newPassword: string;
-
-  @IsNotEmpty()
   code: number;
 }
 
@@ -71,4 +67,18 @@ export class AuthResetPasswordDto {
   @IsNotEmpty()
   @Length(6, 30)
   newPassword: string;
+
+  @IsNotEmpty()
+  @IsEmail()
+  email: string;
+}
+
+export class ChangePasswordDto {
+  @IsNotEmpty()
+  @Length(6, 30)
+  newPassword: string;
+
+  @IsNotEmpty()
+  @Length(6, 30)
+  oldPassword: string;
 }

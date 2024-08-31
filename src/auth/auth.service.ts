@@ -42,6 +42,7 @@ export class AuthService {
 
   async registerUser(user: RegisterDto) {
     const userDetails = await this.userRepo.findOneBy({ email: user.email });
+
     if (userDetails) {
       throw new HttpException(
         `Email address already in use, please try again with another email`,
@@ -216,7 +217,7 @@ export class AuthService {
     const hash = hashText(refreshToken);
 
     await this.userRepo.update(userId, {
-      hasedRefreshToken: 'alice',
+      hasRefreshToken: 'alice',
     });
   }
 
@@ -245,62 +246,51 @@ export class AuthService {
   }
 
   async forgetPasswordRequestOtp({ email }: { email: string }) {
-    try {
-      const user = await this.getUserByEmail({ email });
-      if (!user) {
-        throw new HttpException(
-          `Email not found in the system`,
-          HttpStatus.UNAUTHORIZED,
-        );
-      }
-
-      let data;
-      const otp = generateOtp();
-
-      const codeEntry = await this.getOtpCodeEntry(email);
-
-      if (!codeEntry) {
-        data = await this.verificationCodeRepo.save({
-          code: otp,
-          type: VerificationCodeType.forgotPassword,
-          email: email,
-          createdDate: new Date(),
-        });
-      } else {
-        data = {
-          ...codeEntry,
-          code: otp,
-          createdDate: new Date(),
-        };
-        data = this.verificationCodeRepo.update(codeEntry.id, data);
-      }
-
-      try {
-        await this.mailService.sendMail({
-          from: 'notification@prepmeets.com',
-          to: email,
-          subject: `Password reset`,
-          text: `Your verification code is ${otp}`,
-        });
-      } catch (error) {
-        throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
-      }
-      return `code sent to ${email}`;
-    } catch (error) {
+    const user = await this.getUserByEmail({ email });
+    if (!user) {
       throw new HttpException(
-        `Internal server`,
-        HttpStatus.INTERNAL_SERVER_ERROR,
+        `Email not found in the system`,
+        HttpStatus.UNAUTHORIZED,
       );
     }
+
+    let data;
+    const otp = generateOtp();
+
+    const codeEntry = await this.getOtpCodeEntry(email);
+
+    if (!codeEntry) {
+      data = await this.verificationCodeRepo.save({
+        code: otp,
+        type: VerificationCodeType.forgotPassword,
+        email: email,
+        createdDate: new Date(),
+      });
+    } else {
+      data = {
+        ...codeEntry,
+        code: otp,
+        createdDate: new Date(),
+        verified: false,
+      };
+      data = this.verificationCodeRepo.update(codeEntry.id, data);
+    }
+
+    try {
+      await this.mailService.sendMail({
+        from: 'notification@prepmeets.com',
+        to: email,
+        subject: `Password reset`,
+        text: `Your verification code is ${otp}`,
+      });
+    } catch (error) {
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+    return `code sent to ${email}`;
   }
 
-  async verifyForgetPasswordOtp(
-    email: string,
-    code: number,
-    newPassword: string,
-  ) {
+  async verifyForgetPasswordOtp(email: string, code: number) {
     const expirationTimeInMinutes = 10;
-
     const codeEntry = await this.getOtpCodeEntry(email);
     if (!codeEntry) {
       throw new HttpException(
@@ -324,14 +314,9 @@ export class AuthService {
       );
     }
 
-    const user = await this.getUserByEmail({ email });
-    const hashNewPassword = hashText(newPassword);
-    await this.verificationCodeRepo.update(codeEntry.id, {
+    return await this.verificationCodeRepo.update(codeEntry.id, {
       verified: true,
       type: VerificationCodeType.forgotPassword,
-    });
-    return await this.userRepo.update(user.id, {
-      password: hashNewPassword,
     });
   }
 
@@ -397,8 +382,44 @@ export class AuthService {
     });
   }
 
-  async resetPassword(id: number, password: string) {
-    return await this.userRepo.update(id, { password: hashText(password) });
+  async resetPassword(email: string, password: string) {
+    const codeEntry = await this.getOtpCodeEntry(email);
+
+    if (!codeEntry?.verified) {
+      throw new HttpException(
+        `Ensure to have verified your otp`,
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    const user = await this.getUserByEmail({ email });
+    if (!user) {
+      throw new HttpException(
+        `User with the associated email not found`,
+        HttpStatus.NOT_FOUND,
+      );
+    }
+    await this.userRepo.update(user.id, {
+      password: hashText(password),
+    });
+
+    await this.verificationCodeRepo.save({
+      ...codeEntry,
+      verified: false,
+    });
+    return `Done`;
+  }
+
+  async changePassword(id: number, newPassword: string, oldPassword: string) {
+    const oldPwdHash = hashText(oldPassword);
+    const user = await this.getUserById(id);
+    if (oldPwdHash !== user.password) {
+      throw new HttpException(
+        `Old password doesn't match`,
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
+    return await this.userRepo.update(id, { password: hashText(newPassword) });
   }
 
   async getAllUserByRole(role: UserRole) {

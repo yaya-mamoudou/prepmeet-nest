@@ -42,7 +42,7 @@ export class User {
   hasAcceptedTerms: boolean;
 
   @Column({ nullable: true })
-  hasedRefreshToken: string;
+  hasRefreshToken: string;
 
   @Column({ nullable: true })
   phoneNumber: string;

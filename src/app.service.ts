@@ -18,9 +18,10 @@ export class AppService {
 
   async getLoggedInUser(user: JwtContent) {
     if (user.role === UserRole.client) {
-      return this.authService.getLoggedInUser(user);
+      const userInfo = await this.authService.getLoggedInUser(user);
+      return { user: userInfo };
     }
-    return this.expertProfileService.getExpertProfileById(user.uid);
+    return await this.expertProfileService.getExpertProfileById(user.uid);
   }
 
   async getAllFocusArea(query: PaginateQuery) {
