@@ -8,7 +8,7 @@ export class UpdateProfileDto {
   @IsOptional()
   @IsEnum(VisibilityLevel)
   visibilityLevel: VisibilityLevel;
-  focusAreaId: number;
+  focusAreaIds: number[];
   starterPrice: number;
   recommendedPrice: number;
   bestPrice: number;
@@ -30,9 +30,6 @@ export class updateExpertAvailabilityDto {
 }
 
 export class AddEducationExperienceDto {
-  @IsNotEmpty()
-  name: string;
-
   @IsNotEmpty()
   year: string;
 

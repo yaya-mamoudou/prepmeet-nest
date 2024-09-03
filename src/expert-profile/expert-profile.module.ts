@@ -12,6 +12,8 @@ import { Certification } from './entities/certification.entity';
 import { StripeModule } from 'src/stripe/stripe.module';
 import { Availability } from 'src/session/entities/availability';
 import { AuthModule } from 'src/auth/auth.module';
+import { UserFocusArea } from './entities/user-focus-area.entity';
+import { DocumentManagementModule } from 'src/document-management/document-management.module';
 
 @Module({
   imports: [
@@ -22,9 +24,11 @@ import { AuthModule } from 'src/auth/auth.module';
       EducationalExperience,
       Certification,
       Availability,
+      UserFocusArea,
     ]),
     StripeModule.forRootAsync(),
     AuthModule,
+    DocumentManagementModule,
   ],
   providers: [ExpertProfileService, AtStrategy, RtStrategy, ExpertRoleStrategy],
   controllers: [ExpertProfileController],

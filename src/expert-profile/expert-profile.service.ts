@@ -18,6 +18,8 @@ import { DaysArray } from 'src/utils/types';
 import { AuthService } from 'src/auth/auth.service';
 import { UserRole } from 'src/utils/enum';
 import { PaginateQuery, paginate } from 'nestjs-paginate';
+import { DocumentManagementService } from 'src/document-management/document-management.service';
+import { UserFocusArea } from './entities/user-focus-area.entity';
 
 @Injectable()
 export class ExpertProfileService {
@@ -36,6 +38,9 @@ export class ExpertProfileService {
     @InjectRepository(Availability)
     private availabilityRepo: Repository<Availability>,
     private readonly authService: AuthService,
+    @InjectRepository(UserFocusArea)
+    private userFocusAreaRepo: Repository<UserFocusArea>,
+    private documentManagementService: DocumentManagementService,
   ) {}
 
   async getExpertProfile(id: number) {
@@ -48,17 +53,23 @@ export class ExpertProfileService {
     const availability = await this.getExpertAvailability(Number(id));
     const certificate = await this.getCertificationById(Number(id));
     const education = await this.getExpertsEducationById(Number(id));
+    const expertFocusArea = await this.getExpertFocusArea(Number(id));
+
     const profileInfo = await this.expertProfileRepo.findOne({
       where: {
         userId: Number(id),
       },
-      relations: {
-        focusArea: true,
-      },
     });
     const user = await this.authService.getUserById(id);
 
-    return { profileInfo, user, certificate, availability, education };
+    return {
+      profileInfo,
+      user,
+      expertFocusArea,
+      education,
+      certificate,
+      availability,
+    };
   }
 
   async getAllExperts(query: PaginateQuery) {
@@ -66,12 +77,12 @@ export class ExpertProfileService {
       sortableColumns: ['id', 'updatedDate', 'createdDate'],
       relations: {
         user: true,
-        focusArea: true,
+        // focusArea: true,
       },
       searchableColumns: [
         'user.firstName',
         'user.lastName',
-        'focusArea.FocusArea',
+        // 'focusArea.FocusArea',
       ],
     });
   }
@@ -91,9 +102,37 @@ export class ExpertProfileService {
       profileInfo.hasOwnProperty('location') ||
       profileInfo.hasOwnProperty('gender') ||
       profileInfo.hasOwnProperty('dateOfBirth') ||
-      profileInfo.hasOwnProperty('phoneNumber')
+      profileInfo.hasOwnProperty('phoneNumber') ||
+      profileInfo.hasOwnProperty('profilePhoto')
     ) {
       await this.authService.updateProfile(id, profileInfo);
+    }
+
+    if (profileInfo.hasOwnProperty('focusAreaIds')) {
+      if (profileInfo?.focusAreaIds?.length > 0) {
+        const allUsersFocusAreas = await this.userFocusAreaRepo.find({
+          where: {
+            userId: id,
+          },
+        });
+        for (let i = 0; i < allUsersFocusAreas.length; i++) {
+          await this.userFocusAreaRepo.delete(allUsersFocusAreas[i].id);
+        }
+
+        for (let i = 0; i < profileInfo?.focusAreaIds.length; i++) {
+          const getFocusArea = await this.focusArea.findOneBy({
+            id: profileInfo?.focusAreaIds[i],
+          });
+          if (!getFocusArea) {
+            continue;
+          }
+
+          await this.userFocusAreaRepo.save({
+            userId: id,
+            focusAreaId: profileInfo?.focusAreaIds[i],
+          });
+        }
+      }
     }
 
     if (
@@ -103,27 +142,16 @@ export class ExpertProfileService {
         profileInfo.hasOwnProperty('starterPrice') ||
         profileInfo.hasOwnProperty('recommendedPrice') ||
         profileInfo.hasOwnProperty('bestPrice') ||
-        profileInfo.hasOwnProperty('videoUrl') ||
-        profileInfo.hasOwnProperty('focusAreaId'))
+        profileInfo.hasOwnProperty('videoUrl'))
     ) {
       const expertProfileInfo = {
         about: profileInfo?.about,
         videoUrl: profileInfo?.videoUrl,
         visibilityLevel: profileInfo?.visibilityLevel,
-        focusAreaId: profileInfo?.focusAreaId,
         starterPrice: profileInfo?.starterPrice,
         recommendedPrice: profileInfo?.recommendedPrice,
         bestPrice: profileInfo?.bestPrice,
       };
-
-      if (expertProfileInfo.focusAreaId) {
-        const getFocusArea = await this.focusArea.findOneBy({
-          id: expertProfileInfo.focusAreaId,
-        });
-        if (!getFocusArea) {
-          throw new HttpException(`Focus Area not found`, HttpStatus.NOT_FOUND);
-        }
-      }
 
       if (!userInfo) {
         let starterPriceUrl;
@@ -165,6 +193,7 @@ export class ExpertProfileService {
         expertProfileInfo,
       );
     }
+
     return `Done`;
   }
 
@@ -218,6 +247,7 @@ export class ExpertProfileService {
       const degree = await this.degreesRepo.findOneBy({
         id: educationExp[i].degreeId,
       });
+
       if (!degree) {
         throw new HttpException(
           `Degree ${educationExp[i].degreeId} not found`,
@@ -336,6 +366,17 @@ export class ExpertProfileService {
     return this.availabilityRepo.find({
       where: {
         expertId: expertId,
+      },
+    });
+  }
+
+  async getExpertFocusArea(expertId: number) {
+    return this.userFocusAreaRepo.find({
+      where: {
+        userId: expertId,
+      },
+      relations: {
+        focusArea: true,
       },
     });
   }

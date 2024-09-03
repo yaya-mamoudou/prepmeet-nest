@@ -15,7 +15,7 @@ export const ExpertSignupExample = {
   role: 'expert',
   phoneNumber: '+237675979594',
   hasAcceptedTerms: true,
-  focusAreaId: 1,
+  focusAreaIds: [1, 2, 3],
   doesUserHasCloudOrDevopsCertification: true,
 };
 

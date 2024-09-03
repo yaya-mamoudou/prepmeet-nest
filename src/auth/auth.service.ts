@@ -19,6 +19,7 @@ import axios from 'axios';
 import { JwtContent } from 'src/utils/types';
 import { ExpertProfile } from 'src/expert-profile/entities/expert-profile.entity';
 import { UpdateProfileDto } from 'src/expert-profile/dto/update-profile.dto';
+import { UserFocusArea } from 'src/expert-profile/entities/user-focus-area.entity';
 
 export interface JWTTokens {
   accessToken: string;
@@ -38,6 +39,8 @@ export class AuthService {
     private verificationEmailRepo: Repository<VerificationEmail>,
     @InjectRepository(ExpertProfile)
     private expertProfileRepo: Repository<ExpertProfile>,
+    @InjectRepository(UserFocusArea)
+    private userFocusAreaRepo: Repository<UserFocusArea>,
   ) {}
 
   async registerUser(user: RegisterDto) {
@@ -68,7 +71,7 @@ export class AuthService {
     if (user.role === UserRole.expert) {
       if (
         !user.phoneNumber ||
-        !user.focusAreaId ||
+        user.focusAreaIds?.length === 0 ||
         !user.doesUserHasCloudOrDevopsCertification
       ) {
         throw new HttpException(
@@ -91,10 +94,18 @@ export class AuthService {
     if (user.role === UserRole.expert) {
       let expert = await this.expertProfileRepo.save({
         userId: newUser.id,
-        focusAreaId: user.focusAreaId,
         doesUserHasCloudOrDevopsCertification:
           user.doesUserHasCloudOrDevopsCertification,
+        createdDate: new Date(),
+        updatedDate: new Date(),
       });
+
+      for (let i = 0; i < user.focusAreaIds.length; i++) {
+        await this.userFocusAreaRepo.save({
+          userId: newUser.id,
+          focusAreaId: user.focusAreaIds[i],
+        });
+      }
       newUser = { ...newUser, ...expert };
     }
 

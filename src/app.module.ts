@@ -29,6 +29,7 @@ import { GoogleRefreshToken } from './google/entities/google-refresh-token';
 import { DocumentManagementModule } from './document-management/document-management.module';
 import { ReviewModule } from './review/review.module';
 import { Review } from './review/entities/review.entity';
+import { UserFocusArea } from './expert-profile/entities/user-focus-area.entity';
 
 @Module({
   controllers: [AppController],
@@ -63,6 +64,7 @@ import { Review } from './review/entities/review.entity';
           Availability,
           GoogleRefreshToken,
           Review,
+          UserFocusArea,
         ],
         synchronize: true,
       }),

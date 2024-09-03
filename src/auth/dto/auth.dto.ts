@@ -38,7 +38,7 @@ export class RegisterDto {
   profilePhoto: string;
   dateOfBirth: Date;
   phoneNumber: string;
-  focusAreaId: number;
+  focusAreaIds: number[];
   doesUserHasCloudOrDevopsCertification: boolean;
 }
 

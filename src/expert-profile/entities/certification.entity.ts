@@ -25,6 +25,6 @@ export class Certification {
   @Column()
   year: string;
 
-  @Column()
+  @Column({ nullable: true, type: 'text' })
   certificationUrl: string;
 }

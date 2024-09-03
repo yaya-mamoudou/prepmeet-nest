@@ -40,3 +40,9 @@ export enum StripePaymentStatus {
   paid = 'paid',
   unpaid = 'unpaid',
 }
+
+export enum FileType {
+  profilePhoto = 'profile-photo',
+  educationalExp = 'educational-experience',
+  aboutVideo = 'about-video',
+}
