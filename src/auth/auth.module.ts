@@ -9,6 +9,7 @@ import { AtStrategy, RtStrategy } from './stategies';
 import { VerificationCode } from './entities/verification-code';
 import { VerificationEmail } from './entities/verification-email';
 import { ExpertProfile } from 'src/expert-profile/entities/expert-profile.entity';
+import { UserFocusArea } from 'src/expert-profile/entities/user-focus-area.entity';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { ExpertProfile } from 'src/expert-profile/entities/expert-profile.entity
       VerificationCode,
       VerificationEmail,
       ExpertProfile,
+      UserFocusArea,
     ]),
     JwtModule.register({}),
   ],

@@ -56,7 +56,7 @@ export class User {
   @Column({ nullable: true })
   gender: Gender;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'text' })
   profilePhoto: string;
 
   @Column({ nullable: true })

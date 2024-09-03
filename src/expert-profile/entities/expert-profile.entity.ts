@@ -24,16 +24,9 @@ export class ExpertProfile {
   user: User;
 
   @Column({ nullable: true })
-  focusAreaId: number;
-
-  @ManyToOne(() => FocusArea, (focusArea) => focusArea.profile)
-  @JoinColumn({ name: 'focusAreaId' })
-  focusArea: FocusArea;
-
-  @Column({ nullable: true })
   about: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'text' })
   videoUrl: string;
 
   @Column({ nullable: true, default: VisibilityLevel.basicVisible })

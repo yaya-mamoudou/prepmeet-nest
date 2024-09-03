@@ -6,9 +6,11 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { Degrees } from './degrees.entity';
+import { FocusArea } from './focus-area.entity';
 
-@Entity('certification')
-export class Certification {
+@Entity('user-focus-area')
+export class UserFocusArea {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -19,12 +21,10 @@ export class Certification {
   @JoinColumn({ name: 'userId' })
   user: number;
 
-  @Column()
-  name: string;
+  @Column({ nullable: true })
+  focusAreaId: number;
 
-  @Column()
-  year: string;
-
-  @Column({ nullable: true, type: 'text' })
-  certificationUrl: string;
+  @ManyToOne(() => FocusArea, (focusArea) => focusArea.profile)
+  @JoinColumn({ name: 'focusAreaId' })
+  focusArea: FocusArea;
 }
