@@ -27,4 +27,8 @@ export class AppService {
   async getAllFocusArea(query: PaginateQuery) {
     return this.expertProfileService.getFocusArea(query);
   }
+
+  async getAllDegrees(query: PaginateQuery) {
+    return this.expertProfileService.getDegrees(query);
+  }
 }

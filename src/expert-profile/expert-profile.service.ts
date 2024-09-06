@@ -389,4 +389,13 @@ export class ExpertProfileService {
       select: ['all'],
     });
   }
+
+  async getDegrees(query: PaginateQuery) {
+    return paginate(query, this.degreesRepo, {
+      sortableColumns: ['id', 'degreeName'],
+      nullSort: 'last',
+      defaultSortBy: [['id', 'DESC']],
+      select: ['all'],
+    });
+  }
 }
