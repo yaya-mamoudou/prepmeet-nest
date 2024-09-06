@@ -37,8 +37,17 @@ export class AppController {
   })
   @ApiOkPaginatedResponse(FocusArea, FOCUS_AREA_PAGINATION_PARAM)
   @ApiPaginationQuery(FOCUS_AREA_PAGINATION_PARAM)
-  getAllFocusArea(@Request() req: any, @Paginate() query: PaginateQuery) {
-    const user = req.user;
+  getAllFocusArea(@Paginate() query: PaginateQuery) {
     return this.appService.getAllFocusArea(query);
+  }
+
+  @Get('/list/degrees')
+  @ApiOperation({
+    summary: 'Get All degess',
+  })
+  @ApiOkPaginatedResponse(FocusArea, FOCUS_AREA_PAGINATION_PARAM)
+  @ApiPaginationQuery(FOCUS_AREA_PAGINATION_PARAM)
+  getAllDegrees(@Paginate() query: PaginateQuery) {
+    return this.appService.getAllDegrees(query);
   }
 }
